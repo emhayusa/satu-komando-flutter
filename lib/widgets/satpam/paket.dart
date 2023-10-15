@@ -4,9 +4,11 @@ import 'package:kjm_security/model/paket.dart';
 import 'package:http/http.dart' as http;
 import 'package:kjm_security/widgets/satpam/detail_paketan.dart';
 import 'package:kjm_security/widgets/satpam/form_paket.dart';
+import 'package:kjm_security/widgets/satpam/form_paket_ambil.dart';
 import 'dart:convert';
 
 import 'package:kjm_security/widgets/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Paket extends StatefulWidget {
   const Paket({super.key});
@@ -23,8 +25,10 @@ class _PaketState extends State<Paket> {
 
   List<Paketan> filteredPaketans = [];
 
-  String apiUrl = 'https://geoportal.big.go.id/api-dev/packages/';
-  String apiView = 'https://geoportal.big.go.id/api-dev/packages/photo/';
+  //String apiUrl = 'https://geoportal.big.go.id/api-dev/packages/';
+  //String apiView = 'https://geoportal.big.go.id/api-dev/packages/photo/';
+  String apiUrl = 'https://satukomando.id/api-prod/paket/';
+  String apiView = 'https://satukomando.id/api-prod/paket/photoDatang/';
 
   @override
   void initState() {
@@ -39,8 +43,14 @@ class _PaketState extends State<Paket> {
       //_image = null;
     });
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user = prefs.getString('user') ?? '';
+      var data = jsonDecode(user);
+      var urlnya = apiUrl + "lokasi/" + data['pegawai']['lokasi']['uuid'];
+      final response = await http.get(Uri.parse(urlnya),
+          headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
+        print(response.body);
         final List<dynamic> data = json.decode(response.body);
         // Create a list of model objects
         print(data);
@@ -73,7 +83,9 @@ class _PaketState extends State<Paket> {
               //permission.date
               //    .toLowerCase()
               //    .contains(searchTerm.toLowerCase()) ||
-              paket.recipient.toLowerCase().contains(searchTerm.toLowerCase()))
+              paket.namaPenerima
+                  .toLowerCase()
+                  .contains(searchTerm.toLowerCase()))
           .toList();
     });
   }
@@ -133,71 +145,113 @@ class _PaketState extends State<Paket> {
         title: const Text('PAKET'),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: TextFormField(
-              controller: searchController,
-              onChanged: filterPermissions,
-              decoration: InputDecoration(
-                labelText: 'Cari nama penerima',
-                prefixIcon: Icon(Icons.search),
+      body: RefreshIndicator(
+        onRefresh: fetchPaket,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: TextFormField(
+                controller: searchController,
+                onChanged: filterPermissions,
+                decoration: InputDecoration(
+                  labelText: 'Cari nama penerima',
+                  prefixIcon: Icon(Icons.search),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: paketans.isEmpty
-                ? isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Center(
-                        child: Text("tidak menemukan data"),
-                      )
-                : filteredPaketans.length == 0
-                    ? Center(
-                        child: Text("tidak menemukan data"),
-                      )
-                    : ListView.builder(
-                        itemCount: filteredPaketans.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          Paketan paketan = filteredPaketans[index];
-                          return Card(
-                            margin: EdgeInsets.all(4.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListTile(
-                                leading: buildImageFromUrl(
-                                    '$apiView/${paketan.code}', 50.0),
-                                title: Text('Nama: ${paketan.recipient}'),
-                                subtitle: Text(
-                                    'Alamat: ${paketan.address}\nHP: ${paketan.hp}\nStatus: ${paketan.takenDatetime == null ? 'Belum diambil' : 'Sudah diambil'}\nWaktu Datang:${DateFormat('dd-MM-yyyy HH:mm:ss').format(paketan.arrivedDatetime)}\nWaktu Ambil: ${paketan.takenDatetime == null ? "-" : DateFormat('dd-MM-yyyy HH:mm:ss').format(paketan.takenDatetime!)}'),
-                                //trailing: Text(permission.date),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => DetailPaketan(
-                                            kode: paketan.code,
-                                            refreshListCallback: fetchPaket)),
-                                  );
-                                },
+            Expanded(
+              child: paketans.isEmpty
+                  ? isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : Center(
+                          child: Text("tidak menemukan data"),
+                        )
+                  : filteredPaketans.length == 0
+                      ? Center(
+                          child: Text("tidak menemukan data"),
+                        )
+                      : ListView.builder(
+                          itemCount: filteredPaketans.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            Paketan paketan = filteredPaketans[index];
+                            return Card(
+                              margin: EdgeInsets.all(4.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListTile(
+                                  leading: buildImageFromUrl(
+                                      '$apiView/${paketan.uuid}', 50.0),
+                                  title: Text('Nama: ${paketan.namaPenerima}'),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                          'Alamat: ${paketan.alamat}\nHP: ${paketan.hp}\nStatus: ${paketan.waktuAmbil == null ? 'Belum diambil' : 'Sudah diambil'}\nWaktu Datang: ${DateFormat('dd MMM yyyy, hh:mm:ss a').format(paketan.waktuDatang.toLocal())}\nPetugas: ${paketan.user.username}\nWaktu Ambil: ${paketan.waktuAmbil == null ? "-" : DateFormat('dd MMM yyyy, hh:mm:ss a').format(paketan.waktuAmbil!.toLocal())} ${paketan.reporter == null ? "" : "\nPetugas: " + paketan.reporter!.username}'),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      paketan.waktuAmbil == null
+                                          ? ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          FormPaketAmbil(
+                                                              paketan: paketan,
+                                                              refreshListCallback:
+                                                                  fetchPaket)),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                //backgroundColor: AppColors.secondaryColor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Text('Ambil Paket'),
+                                            )
+                                          : SizedBox()
+                                    ],
+                                  ),
+                                  //trailing: Text(permission.date),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DetailPaketan(
+                                              paketan: paketan,
+                                              refreshListCallback: fetchPaket)),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-          ),
-          Container(
-            width: double.infinity,
-            margin: EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: navigateToFormPaket,
-              child: Text('Pencatatan paket'),
+                            );
+                          },
+                        ),
             ),
-          ),
-        ],
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: navigateToFormPaket,
+                style: ElevatedButton.styleFrom(
+                  //backgroundColor: AppColors.secondaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(20),
+                ),
+                child: Text('Pencatatan paket'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

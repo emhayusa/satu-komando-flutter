@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kjm_security/model/attendance.dart';
-import 'package:kjm_security/model/presensi.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:kjm_security/model/presensi.model.dart';
+import 'package:kjm_security/widgets/satpam/form_presensi.dart';
 import 'dart:convert';
 
 import 'package:kjm_security/widgets/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Kehadiran extends StatefulWidget {
   const Kehadiran({super.key});
@@ -20,10 +21,10 @@ class _KehadiranState extends State<Kehadiran> {
   bool _isTyped = true;
   TextEditingController searchController = TextEditingController();
 
-  List<Attendance> datas = [];
-  List<Attendance> filteredDatas = [];
+  List<Presensi> datas = [];
+  List<Presensi> filteredDatas = [];
 
-  String apiUrl = 'https://geoportal.big.go.id/api-dev/daily-attendance';
+  String apiUrl = 'https://satukomando.id/api-prod/presensi/user/';
   DateTime _endDate = DateTime.now();
   late DateTime _startDate;
 
@@ -43,17 +44,25 @@ class _KehadiranState extends State<Kehadiran> {
       //_image = null;
     });
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user = prefs.getString('user') ?? '';
+      var data = jsonDecode(user);
+      //print(data['pegawai']['lokasi']['uuid']);
+      // final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
+      var urlnya = apiUrl + data['pegawai']['user']['uuid'];
+      final response = await http.get(Uri.parse(urlnya),
+          headers: {"x-access-token": data['accessToken']});
+
       if (response.statusCode == 200) {
-        //print(response.body);
+        print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
         //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
         final List<dynamic> data = json.decode(response.body);
         // Create a list of model objects
-        List<Attendance> dataList =
-            data.map((json) => Attendance.fromJson(json)).toList();
+        List<Presensi> dataList =
+            data.map((json) => Presensi.fromJson(json)).toList();
 
         print(dataList.length);
 
@@ -76,16 +85,28 @@ class _KehadiranState extends State<Kehadiran> {
 
   void filterTamus(String searchTerm) {
     setState(() {
-      filteredDatas = datas
-          .where((data) =>
-              //permission.date
-              //    .toLowerCase()
-              //    .contains(searchTerm.toLowerCase()) ||
-              data.attendanceStatus
-                  .toLowerCase()
-                  .contains(searchTerm.toLowerCase()))
-          .toList();
+      filteredDatas = datas.where((data) =>
+          //permission.date
+          //    .toLowerCase()
+          //    .contains(searchTerm.toLowerCase()) ||
+          data.tanggal.toString().contains(searchTerm.toLowerCase())).toList();
     });
+  }
+
+  void navigateToPresensiDatang() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FormPresensi(mode: "datang")),
+    );
+    fetchData(); // Refresh the items when returning from the second widget
+  }
+
+  void navigateToPresensiPulang() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FormPresensi(mode: "pulang")),
+    );
+    fetchData(); // Refresh the items when returning from the second widget
   }
 
   @override
@@ -96,7 +117,7 @@ class _KehadiranState extends State<Kehadiran> {
         centerTitle: true,
       ),
       body: RefreshIndicator(
-        onRefresh: _handleRefresh,
+        onRefresh: fetchData,
         child: Column(
           children: [
             /*Row(
@@ -200,16 +221,16 @@ class _KehadiranState extends State<Kehadiran> {
                       : ListView.builder(
                           itemCount: filteredDatas.length,
                           itemBuilder: (BuildContext context, int index) {
-                            Attendance data = filteredDatas[index];
+                            Presensi data = filteredDatas[index];
                             return Card(
                               margin: EdgeInsets.all(4.0),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ListTile(
-                                  title:
-                                      Text('Status: ${data.attendanceStatus}'),
+                                  title: Text(
+                                      'Tanggal: ${DateFormat('dd/MM/yyyy').format(data.tanggal)}'),
                                   subtitle: Text(
-                                      'Tanggal:\n${DateFormat('dd/MM/yyyy').format(data.attendanceDate)}'),
+                                      'Datang: ${DateFormat('hh:mm:ss a').format(data.waktuDatang.toLocal())} (${data.longDatang}, ${data.latDatang})\nPulang: ${data.waktuPulang == null ? "-" : DateFormat('hh:mm:ss a').format(data.waktuPulang!.toLocal()) + " (${data.longPulang}, ${data.latPulang})"} '),
                                   //trailing: Text(permission.date),
                                   onTap: () {
                                     /*
@@ -227,24 +248,40 @@ class _KehadiranState extends State<Kehadiran> {
                           },
                         ),
             ),
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: navigateToPresensiDatang,
+                    style: ElevatedButton.styleFrom(
+                      //backgroundColor: AppColors.secondaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(20),
+                    ),
+                    child: Text('Presensi Datang'),
+                  ),
+                  ElevatedButton(
+                    onPressed: navigateToPresensiPulang,
+                    style: ElevatedButton.styleFrom(
+                      //backgroundColor: AppColors.secondaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(20),
+                    ),
+                    child: Text('Presensi Pulang'),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _handleRefresh() async {
-    // Simulate a delay
-    await Future.delayed(Duration(seconds: 2));
-
-    // Generate new list data
-    List<String> refreshedItems =
-        List<String>.generate(20, (index) => 'Refreshed Item ${index + 1}');
-
-    // Update the UI with the new data
-    // In a real app, you might fetch the data from an API
-    // and update the state accordingly
-    //items.clear();
-    //items.addAll(refreshedItems);
   }
 }

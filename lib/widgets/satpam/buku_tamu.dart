@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:kjm_security/model/bukutamu.dart';
 import 'package:kjm_security/model/tamu.dart';
 import 'package:kjm_security/widgets/satpam/detail_tamu.dart';
 import 'package:kjm_security/widgets/satpam/form_tamu.dart';
@@ -8,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:kjm_security/widgets/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BukuTamu extends StatefulWidget {
   const BukuTamu({super.key});
@@ -20,17 +22,17 @@ class _BukuTamuState extends State<BukuTamu> {
   late DateTime selectedDate;
   bool isLoading = false;
   TextEditingController searchController = TextEditingController();
-  List<Tamu> tamus = [];
+  List<Bukutamu> tamus = [];
   //  Tamu('1', 'Joko', 'PT. Katulampa', 'Divisi Sales', 'Promosi barang',
   //      '2023-05-16 08:00:00', '2023-05-16 08:23:00'),
   //  Tamu('2', 'Budi', 'Perorangan', 'Divisi HRD', 'Melamar pekerjaan',
   //     '2023-05-16 09:00:00', '-'),
   //];
 
-  List<Tamu> filteredTamus = [];
+  List<Bukutamu> filteredTamus = [];
 
-  String apiUrl = 'https://geoportal.big.go.id/api-dev/guest_book/';
-  String apiView = 'https://geoportal.big.go.id/api-dev/guest_book/photo/';
+  String apiUrl = 'https://satukomando.id/api-prod/bukutamu/';
+  String apiView = 'https://satukomando.id/api-prod/bukutamu/photo/';
 
   @override
   void initState() {
@@ -47,16 +49,25 @@ class _BukuTamuState extends State<BukuTamu> {
       //_image = null;
     });
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user = prefs.getString('user') ?? '';
+      var data = jsonDecode(user);
+      //print(data['pegawai']['lokasi']['uuid']);
+      // final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
+      var urlnya = apiUrl + "lokasi/" + data['pegawai']['lokasi']['uuid'];
+      //print(urlnya);
+      final response = await http.get(Uri.parse(urlnya),
+          headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
-        //print(response.body);
+        print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
         //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
         final List<dynamic> data = json.decode(response.body);
         // Create a list of model objects
-        List<Tamu> tamuList = data.map((json) => Tamu.fromJson(json)).toList();
+        List<Bukutamu> tamuList =
+            data.map((json) => Bukutamu.fromJson(json)).toList();
 
         print(tamuList.length);
 
@@ -84,7 +95,7 @@ class _BukuTamuState extends State<BukuTamu> {
               //permission.date
               //    .toLowerCase()
               //    .contains(searchTerm.toLowerCase()) ||
-              tamu.guestName.toLowerCase().contains(searchTerm.toLowerCase()))
+              tamu.namaTamu.toLowerCase().contains(searchTerm.toLowerCase()))
           .toList();
     });
   }
@@ -158,71 +169,86 @@ class _BukuTamuState extends State<BukuTamu> {
         title: const Text('BUKU TAMU'),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: TextFormField(
-              controller: searchController,
-              onChanged: filterTamus,
-              decoration: InputDecoration(
-                labelText: 'Cari nama tamu',
-                prefixIcon: Icon(Icons.search),
+      body: RefreshIndicator(
+        onRefresh: fetchTamu,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: TextFormField(
+                controller: searchController,
+                onChanged: filterTamus,
+                decoration: InputDecoration(
+                  labelText: 'Cari nama tamu',
+                  prefixIcon: Icon(Icons.search),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: tamus.isEmpty
-                ? isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Center(
-                        child: Text("tidak menemukan data"),
-                      )
-                : filteredTamus.length == 0
-                    ? Center(
-                        child: Text("tidak menemukan data"),
-                      )
-                    : ListView.builder(
-                        itemCount: filteredTamus.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          Tamu tamu = filteredTamus[index];
-                          return Card(
-                            margin: EdgeInsets.all(4.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListTile(
-                                leading: buildImageFromUrl(
-                                    '$apiView/${tamu.code}', 50.0),
-                                title: Text('Nama: ${tamu.guestName}'),
-                                subtitle: Text(
-                                    'Asal: ${tamu.companyName}\nTujuan: ${tamu.comeTo}\nKeperluan: ${tamu.purpose}\nDatang:${DateFormat('dd-MM-yyyy HH:mm:ss').format(tamu.visitDatetime)}\nPulang: ${tamu.departureDatetime == null ? "-" : DateFormat('dd-MM-yyyy HH:mm:ss').format(tamu.departureDatetime!)}'),
-                                //trailing: Text(permission.date),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => DetailTamu(
-                                            kode: tamu.code,
-                                            refreshListCallback: fetchTamu)),
-                                  );
-                                },
+            Expanded(
+              child: tamus.isEmpty
+                  ? isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : Center(
+                          child: Text("tidak menemukan data"),
+                        )
+                  : filteredTamus.length == 0
+                      ? Center(
+                          child: Text("tidak menemukan data"),
+                        )
+                      : ListView.builder(
+                          itemCount: filteredTamus.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            Bukutamu tamu = filteredTamus[index];
+                            print(tamu.waktuDatang);
+                            //print(DateFormat("yyyy-MM-ddTHH:mm:ssZ")
+                            //    .parseUTC(tamu.waktuDatang.toIso8601String()));
+                            //print(DateFormat('dd MMM yyyy hh:mm:ss a')
+                            //    .format(tamu.waktuDatang.toLocal()));
+                            return Card(
+                              margin: EdgeInsets.all(4.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListTile(
+                                  leading: buildImageFromUrl(
+                                      '$apiView/${tamu.uuid}', 50.0),
+                                  title: Text('Nama: ${tamu.namaTamu}'),
+                                  subtitle: Text(
+                                      'Tujuan: ${tamu.tujuan}\nKeperluan: ${tamu.keperluan}\nDatang: ${DateFormat('dd MMM yyyy, hh:mm:ss a').format(tamu.waktuDatang.toLocal())}\nPetugas: ${tamu.user.username}\nPulang: ${tamu.waktuPulang == null ? "-" : DateFormat('dd MMM yyyy, hh:mm:ss a').format(tamu.waktuPulang!.toLocal())} ${tamu.reporter == null ? "" : "\nPetugas: " + tamu.reporter!.username}'),
+                                  //trailing: Text(permission.date),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DetailTamu(
+                                              tamu: tamu,
+                                              refreshListCallback: fetchTamu)),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-          ),
-          Container(
-            width: double.infinity,
-            margin: EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: navigateToFormTamu,
-              child: Text('Input Buku Tamu'),
+                            );
+                          },
+                        ),
             ),
-          ),
-        ],
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: navigateToFormTamu,
+                style: ElevatedButton.styleFrom(
+                  //backgroundColor: AppColors.secondaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(20),
+                ),
+                child: Text('Input Buku Tamu'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

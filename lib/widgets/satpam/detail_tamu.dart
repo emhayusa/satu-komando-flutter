@@ -3,45 +3,64 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:kjm_security/model/bukutamu.dart';
+import 'package:kjm_security/model/lokasi.dart';
+import 'package:kjm_security/model/reporter.dart';
 import 'package:kjm_security/model/tamu.dart';
 import 'package:kjm_security/widgets/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailTamu extends StatefulWidget {
-  final String kode;
+  final Bukutamu tamu;
   final Function refreshListCallback;
   const DetailTamu(
-      {super.key, required this.kode, required this.refreshListCallback});
+      {super.key, required this.tamu, required this.refreshListCallback});
 
   @override
   State<DetailTamu> createState() => _DetailTamuState();
 }
 
 class _DetailTamuState extends State<DetailTamu> {
-  Tamu tamu = Tamu(
-      guestName: "guestName",
-      code: "code",
-      visitDatetime: DateTime.now(),
-      comeTo: "comeTo",
-      purpose: "purpose",
-      companyName: "companyName");
+  /*Bukutamu tamu = Bukutamu(
+      uuid: "uuid",
+      namaTamu: "namaTamu",
+      tujuan: "tujuan",
+      keperluan: "keperluan",
+      tanggal: DateTime.now(),
+      waktuDatang: DateTime.now(),
+      waktuPulang: null,
+      createdAt: DateTime.now(),
+      user: Reporter(
+        uuid: "uuid",
+        username: "username",
+      ),
+      lokasi: Lokasi(
+        uuid: "uuid",
+        lokasiName: "lokasiName",
+      ),
+      reporter: null);
+      */
   String selectedItem = '';
   bool _isUploading = false;
-  String apiUrl = 'https://geoportal.big.go.id/api-dev/guest_book/';
-  String apiView = 'https://geoportal.big.go.id/api-dev/guest_book/photo/';
-  String apiAmbil = 'https://geoportal.big.go.id/api-dev/guest_book/pulang/';
+  String apiUrl = 'https://satukomando.id/api-prod/bukutamu/';
+  String apiView = 'https://satukomando.id/api-prod/bukutamu/photo/';
+  String apiPulang = 'https://satukomando.id/api-prod/bukutamu/pulang/';
 
   @override
   void initState() {
     super.initState();
-    fetchTamu(widget.kode);
+    //fetchTamu(widget.kode);
   }
-
+/*
   Future<void> fetchTamu(String kode) async {
     try {
-      final response = await http.get(Uri.parse('$apiUrl$kode'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user = prefs.getString('user') ?? '';
+      var data = jsonDecode(user);
+      final response = await http.get(Uri.parse('$apiUrl$kode'),
+          headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
-        //print(response.body);
+        print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
@@ -50,7 +69,7 @@ class _DetailTamuState extends State<DetailTamu> {
 
         // Create an instance of the model class
         print(jsonData.length);
-        Tamu _tamu = Tamu.fromJson(jsonData);
+        Bukutamu _tamu = Bukutamu.fromJson(jsonData);
 
         setState(() {
           //codes = urls;
@@ -62,33 +81,32 @@ class _DetailTamuState extends State<DetailTamu> {
     } catch (e) {
       print('Terjadi kesalahan saat mengambil data tamu: $e');
     }
-  }
+  }*/
 
   Future<void> tamuPulang() async {
     // Mengambil email dan password dari controller
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('user_id') ?? '';
-    print(widget.kode);
-    if (widget.kode.isNotEmpty) {
+    String user = prefs.getString('user') ?? '';
+    var data = jsonDecode(user);
+    // print(data.kode);
+    if (data["pegawai"]["user"]["uuid"].isNotEmpty) {
       setState(() {
         _isUploading = true;
       });
-      print(userId);
+      //print(userId);
       // Simulasi request ke API
       //await Future.delayed(Duration(seconds: 2));
       try {
         // Menjalankan request ke API
-        Map<String, dynamic> requestBody = {
-          'code': widget.kode,
-          'user_id': userId,
-        };
-
+        dynamic requestBody = data["pegawai"]["user"];
+        print(requestBody);
         // Mengirim permintaan POST ke API
-
-        var response = await http.post(
-          Uri.parse(apiAmbil),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(requestBody),
+        print(widget.tamu.uuid);
+        print(apiPulang + widget.tamu.uuid);
+        var response = await http.put(
+          Uri.parse(apiPulang + widget.tamu.uuid),
+          headers: {"x-access-token": data['accessToken']},
+          body: requestBody,
         );
         //print(response.body);
         if (response.statusCode == 200) {
@@ -114,11 +132,12 @@ class _DetailTamuState extends State<DetailTamu> {
         } else {
           var data = jsonDecode(response.body);
           // Menampilkan pesan error jika login gagal
+          print(response.reasonPhrase);
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
               title: Text('Update gagal'),
-              content: Text(data['error']),
+              content: Text(data['message']),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -129,6 +148,7 @@ class _DetailTamuState extends State<DetailTamu> {
           );
         }
       } catch (e) {
+        print(e);
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -175,39 +195,35 @@ class _DetailTamuState extends State<DetailTamu> {
           child: Column(
             children: [
               SizedBox(height: 40.0),
-              tamu.code != "code"
-                  ? buildImageFromUrl('$apiView${tamu.code}', 200.0)
+              widget.tamu.uuid != "code"
+                  ? buildImageFromUrl('$apiView${widget.tamu.uuid}', 200.0)
                   : Container(),
               SizedBox(height: 16.0),
               Text(
-                '${tamu.guestName}',
+                '${widget.tamu.namaTamu}',
                 style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8.0),
               ListTile(
-                leading: Icon(Icons.home),
-                title: Text(tamu.companyName),
-              ),
-              ListTile(
                 leading: Icon(Icons.apartment),
-                title: Text(tamu.comeTo),
+                title: Text(widget.tamu.tujuan),
               ),
               ListTile(
                 leading: Icon(Icons.edit_calendar),
-                title: Text(tamu.purpose),
+                title: Text(widget.tamu.keperluan),
               ),
               ListTile(
                 leading: Icon(Icons.access_time),
                 title: Text(DateFormat('dd-MM-yyyy HH:mm:ss')
-                    .format(tamu.visitDatetime)),
+                    .format(widget.tamu.waktuDatang)),
               ),
               ListTile(
                 leading: Icon(Icons.access_alarms),
                 title: Text(
-                    '${tamu.departureDatetime == null ? '-' : DateFormat('dd-MM-yyyy HH:mm:ss').format(tamu.departureDatetime!)}'),
+                    '${widget.tamu.waktuPulang == null ? '-' : DateFormat('dd-MM-yyyy HH:mm:ss').format(widget.tamu.waktuPulang!)}'),
               ),
               SizedBox(height: 16.0),
-              tamu.departureDatetime == null
+              widget.tamu.waktuPulang == null
                   ? Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(8.0),

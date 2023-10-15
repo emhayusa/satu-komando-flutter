@@ -20,47 +20,47 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String sessionId = prefs.getString('session_id') ?? '';
+    //String sessionId = prefs.getString('session_id') ?? '';
     //kirim permintaan ke API untuk logout
-    var response = await http.post(
-      Uri.parse(API_LOGOUT),
-      headers: {'Authorization': 'Bearer $sessionId'},
+    //var response = await http.post(
+    //  Uri.parse(API_LOGOUT),
+    //  headers: {'Authorization': 'Bearer $sessionId'},
+    //);
+
+    //if (response.statusCode == 200) {
+    // Hapus session dari shared preferences
+    prefs.remove('user');
+    //prefs.remove('session_id');
+
+    // Pindah ke halaman login (setelah logout berhasil)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
     );
-
-    if (response.statusCode == 200) {
-      // Hapus session dari shared preferences
-      prefs.remove('user_id');
-      prefs.remove('session_id');
-
-      // Pindah ke halaman login (setelah logout berhasil)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Logout berhasil..'),
-          behavior:
-              SnackBarBehavior.floating, // Ubah lokasi menjadi di bagian atas
-          duration: Duration(seconds: 3),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Logout gagal'),
-          content: Text('Gagal Logout. Coba lagi.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Logout berhasil..'),
+        behavior:
+            SnackBarBehavior.floating, // Ubah lokasi menjadi di bagian atas
+        duration: Duration(seconds: 3),
+        backgroundColor: Colors.green,
+      ),
+    );
+    //} else {
+    //  showDialog(
+    //    context: context,
+    //    builder: (context) => AlertDialog(
+    //     title: Text('Logout gagal'),
+    //     content: Text('Gagal Logout. Coba lagi.'),
+    //     actions: [
+    //       TextButton(
+    //         onPressed: () => Navigator.pop(context),
+    //         child: Text('OK'),
+    //       ),
+    //     ],
+    //   ),
+    // );
+    //}
   }
 
   static const List<Widget> _widgetOptions = <Widget>[

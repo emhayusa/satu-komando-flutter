@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:kjm_security/model/reportType.dart';
 import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,15 +20,88 @@ class _FormKejadianState extends State<FormKejadian> {
   final _formKey = GlobalKey<FormState>();
   XFile? _image;
   bool _isUploading = false;
-  String _selectedOption1 = "Kebakaran";
-  List<String> _options1 = [
-    'Kebakaran',
-    'Perkelahian',
-    'Pencurian',
-    'Kerusakan',
-  ];
+  bool isLoading = false;
+
+  String _selectedOption1 = "";
+
+  List<ReportType> datas = [];
+  //List<String> _options1 = [
+  //  'Kebakaran',
+  //  'Perkelahian',
+  //  'Pencurian',
+  //  'Kerusakan',
+  //];
   final ImagePicker _picker = ImagePicker();
   TextEditingController _situasiController = TextEditingController();
+
+  String apiUrl = 'https://satukomando.id/api-prod/report/';
+  String apiUrlView = 'https://satukomando.id/api-prod/report-type/';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+    // Initialize selectedDate with current date
+    // filteredTamus = tamus;
+  }
+
+  Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+      //_uploadProgress = 0.0;
+      //_image = null;
+    });
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user = prefs.getString('user') ?? '';
+      var data = jsonDecode(user);
+      //print(data['pegawai']['lokasi']['uuid']);
+      // final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
+      var urlnya = apiUrlView;
+      //print(urlnya);
+      final response = await http.get(Uri.parse(urlnya),
+          headers: {"x-access-token": data['accessToken']});
+      if (response.statusCode == 200) {
+        print(response.body);
+        //print(json.decode(response.body));
+        //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
+
+        //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
+        //final List<dynamic> data = json.decode(response.body);
+        //print(data);
+        //data.map((json) => json);
+        // Create a list of model objects
+        //List<Laporan> dataList =
+        //    data.map((json) => Laporan.fromJson(json)).toList();
+
+        final List<dynamic> datanya = json.decode(response.body);
+
+        List<ReportType> tamuList =
+            datanya.map((json) => ReportType.fromJson(json)).toList();
+
+        // Create a list of model objects
+
+        print(tamuList.length);
+
+        //print(dataList.length);
+
+        setState(() {
+          datas = tamuList;
+          _selectedOption1 = tamuList[0].name;
+        });
+      } else {
+        print('Gagal mengambil data ');
+      }
+    } catch (e) {
+      print('Terjadi kesalahan saat mengambil data: $e');
+    }
+    setState(() {
+      isLoading = false;
+      //_uploadProgress = 0.0;
+      //_image = null;
+    });
+  }
+
   @override
   void dispose() {
     // Dispose any resources used by the image picker
@@ -46,9 +122,11 @@ class _FormKejadianState extends State<FormKejadian> {
 
   Future<void> _uploadData() async {
     //String apiUrl = 'https://geoportal.big.go.id/api-dev/file/upload';
-    String apiUrl = 'https://geoportal.big.go.id/api-dev/incidents/';
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('user_id') ?? '';
+    String user = prefs.getString('user') ?? '';
+    var data = jsonDecode(user);
+    print(data);
 
     setState(() {
       _isUploading = true;
@@ -62,31 +140,52 @@ class _FormKejadianState extends State<FormKejadian> {
         final length = await _image!.length();
 
         final multipartFile = http.MultipartFile(
-          'image',
+          'file',
           stream,
           length,
           filename: path.basename(_image!.path),
         );
 
-        request.fields['category'] = _selectedOption1;
-        request.fields['situation'] = _situasiController.text;
-        request.fields['user_id'] = userId;
+        print(_selectedOption1);
+        List<ReportType> filtered = [];
+        filtered = datas
+            .where((data) => data.name
+                .toLowerCase()
+                .contains(_selectedOption1.toLowerCase()))
+            .toList();
+        print(filtered[0].toJson());
+        request.fields['data'] = '{"description":"' +
+            _situasiController.text +
+            '","reportType":' +
+            jsonEncode(filtered[0].toJson()) +
+            ',"user":' +
+            jsonEncode(data['pegawai']['user']) +
+            ',"lokasi":' +
+            jsonEncode(data['pegawai']['lokasi']) +
+            '}';
+        print(jsonEncode(data['pegawai']['user']));
+        //request.fields['guest_name'] = _namaController.text;
+        //request.fields['come_to'] = _tujuanController.text;
+        //request.fields['purpose'] = _keperluanController.text;
 
         request.files.add(multipartFile);
-
+        request.headers.addAll({'x-access-token': data['accessToken']});
         final response = await request.send();
 
         final totalBytes = response.contentLength;
+        print("total bytes");
         print(totalBytes);
         await response.stream.listen(
           (List<int> event) {
             final sentBytes = event.length;
-            print('sent $sentBytes');
+            // print('sent $sentBytes');
             //_updateProgress(sentBytes, totalBytes!);
           },
           onDone: () {
             //print(response.statusCode);
-            if (response.statusCode == 201) {
+            //print(response.request);
+
+            if (response.statusCode == 200) {
               // Upload completed successfully
               //Navigator.pop(context);
               //widget.onClose();
@@ -102,6 +201,7 @@ class _FormKejadianState extends State<FormKejadian> {
               Navigator.pop(context);
             } else {
               // Handle API error response
+              print(response.reasonPhrase);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Data gagal dikirim'),
@@ -121,6 +221,7 @@ class _FormKejadianState extends State<FormKejadian> {
           },
           onError: (error) {
             // Handle upload error
+            // print(error);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Terjadi Error..'),
@@ -140,7 +241,7 @@ class _FormKejadianState extends State<FormKejadian> {
       }
     } catch (e) {
       // Menangani kesalahan yang terjadi saat mengunggah gambar
-      print(e);
+      //print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Oops.. Error terjadi..'),
@@ -188,6 +289,13 @@ class _FormKejadianState extends State<FormKejadian> {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => _openCamera(context),
+                  style: ElevatedButton.styleFrom(
+                    //backgroundColor: AppColors.secondaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(20),
+                  ),
                   child: Text('Ambil Photo'),
                 ),
                 DropdownButtonFormField<String>(
@@ -202,16 +310,16 @@ class _FormKejadianState extends State<FormKejadian> {
                     });
                   },
                   //(val) => _handleOption1Change,
-                  items: _options1.map((String option) {
+                  items: datas.map((ReportType option) {
                     return DropdownMenuItem<String>(
-                      value: option,
-                      child: Text(option),
+                      value: option.name,
+                      child: Text(option.name),
                     );
                   }).toList(),
                 ),
                 TextFormField(
                   controller: _situasiController,
-                  maxLines: 4,
+                  //maxLines: 4,
                   decoration: InputDecoration(
                     labelText: 'Situasi',
                   ),
@@ -234,6 +342,13 @@ class _FormKejadianState extends State<FormKejadian> {
                               _uploadData();
                             }
                           },
+                    style: ElevatedButton.styleFrom(
+                      //backgroundColor: AppColors.secondaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(20),
+                    ),
                     child: Text(_isUploading ? 'Processing..' : 'Simpan'),
                   ),
                 ),

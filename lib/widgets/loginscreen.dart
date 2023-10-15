@@ -16,16 +16,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController emailController = TextEditingController();
+  //TextEditingController emailController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   bool isHidden = true;
 
   Future<void> login() async {
     // Mengambil email dan password dari controller
-    String email = emailController.text;
+    //String email = emailController.text;
+    String username = usernameController.text;
     String password = passwordController.text;
-    if (email.isNotEmpty && password.isNotEmpty) {
+    if (username.isNotEmpty && password.isNotEmpty) {
       setState(() {
         isLoading = true;
       });
@@ -35,8 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         // Menjalankan request ke API
         Map<String, dynamic> requestBody = {
-          'email': email,
-          'password': password,
+          "username": username,
+          "password": password,
         };
 
         // Mengirim permintaan POST ke API
@@ -48,30 +50,40 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         //print(response.body);
         if (response.statusCode == 200) {
+          print(response.body);
+          //print(response.body.runtimeType);
           // Parsing response ke dalam bentuk JSON
           var data = jsonDecode(response.body);
 
+          //print(data);
+          print(data['roles'][0]);
+          //print(data.runtimeType);
+          //print(data['pegawai']);
+          await saveUser(response.body);
+
           // Menyimpan session ke shared preferences
+          /*
           await saveSession(data['user_id'], data['session_id']);
-          if (data['role'] == 'satpam') {
+          */
+          if (data['roles'][0] == 'ROLE_SATPAM') {
             // Pindah ke halaman utama (setelah login berhasil)
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => HomePage()),
             );
-          } else if (data['role'] == 'admin') {
+          } else if (data['roles'][0] == 'ROLE_ADMIN') {
             // Pindah ke halaman utama (setelah login berhasil)
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => AdminPage()),
             );
-          } else if (data['role'] == 'supervisor') {
+          } else if (data['roles'][0] == 'supervisor') {
             // Pindah ke halaman utama (setelah login berhasil)
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => SupervisorPage()),
             );
-          } else if (data['role'] == 'client') {
+          } else if (data['role'][0] == 'client') {
             // Pindah ke halaman utama (setelah login berhasil)
             Navigator.pushReplacement(
               context,
@@ -85,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text('Login gagal'),
-              content: Text(data['error']),
+              content: Text(data['message']),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -96,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
+        print(e);
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -136,6 +149,11 @@ class _LoginScreenState extends State<LoginScreen> {
     await prefs.setString('session_id', sessionId);
   }
 
+  Future<void> saveUser(String user) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', user);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,6 +180,17 @@ class _LoginScreenState extends State<LoginScreen> {
             TextField(
               cursorColor: Colors.black87,
               autocorrect: false,
+              controller: usernameController,
+              decoration: InputDecoration(
+                labelText: "Username",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(9),
+                ),
+              ),
+            ),
+            /*TextField(
+              cursorColor: Colors.black87,
+              autocorrect: false,
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
@@ -170,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(9),
                 ),
               ),
-            ),
+            ),*/
             SizedBox(
               height: 15,
             ),
@@ -212,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 20,
             ),
 
-            Center(child: Text("Version: 0.1.2")),
+            Center(child: Text("Version: 0.1.3")),
             //TextButton(
             //  onPressed: () {},
             //  child: Text("forgot password?"),

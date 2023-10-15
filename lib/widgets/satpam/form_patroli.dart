@@ -1,21 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FormPatroli extends StatefulWidget {
-  final String kode;
-  final String name;
-
-  const FormPatroli({
-    super.key,
-    required this.kode,
-    required this.name,
-  });
+  const FormPatroli({super.key});
 
   @override
   State<FormPatroli> createState() => _FormPatroliState();
@@ -23,15 +16,12 @@ class FormPatroli extends StatefulWidget {
 
 class _FormPatroliState extends State<FormPatroli> {
   final _formKey = GlobalKey<FormState>();
-  XFile? _image1;
-  XFile? _image2;
-
+  XFile? _image;
   bool _isUploading = false;
+  String apiUrl = 'https://satukomando.id/api-prod/patroli';
 
   final ImagePicker _picker = ImagePicker();
-  TextEditingController _barcodeController =
-      TextEditingController(text: "belum scan");
-  TextEditingController _situasiController = TextEditingController();
+  TextEditingController _deskripsiController = TextEditingController();
   @override
   void dispose() {
     // Dispose any resources used by the image picker
@@ -43,19 +33,7 @@ class _FormPatroliState extends State<FormPatroli> {
 
     if (image != null) {
       setState(() {
-        _image1 = image;
-      });
-      //File imageFile = File(image.path);
-      //_uploadImage(imageFile, context);
-    }
-  }
-
-  Future<void> _openCamera2(BuildContext context) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-
-    if (image != null) {
-      setState(() {
-        _image2 = image;
+        _image = image;
       });
       //File imageFile = File(image.path);
       //_uploadImage(imageFile, context);
@@ -64,46 +42,59 @@ class _FormPatroliState extends State<FormPatroli> {
 
   Future<void> _uploadData() async {
     //String apiUrl = 'https://geoportal.big.go.id/api-dev/file/upload';
-    String apiUrl = 'https://geoportal.big.go.id/api-dev/patrol/';
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('user_id') ?? '';
+    String user = prefs.getString('user') ?? '';
+    var data = jsonDecode(user);
+    print(data);
 
     setState(() {
       _isUploading = true;
     });
 
     try {
-      if (_image1 != null && _image2 != null) {
+      if (_image != null) {
         final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
 
-        final stream = http.ByteStream(_image1!.openRead());
-        final length = await _image1!.length();
+        final stream = http.ByteStream(_image!.openRead());
+        final length = await _image!.length();
 
         final multipartFile = http.MultipartFile(
-          'image',
+          'file',
           stream,
           length,
-          filename: path.basename(_image1!.path),
+          filename: path.basename(_image!.path),
         );
-
-        request.fields['situasi'] = _situasiController.text;
-        request.fields['user_id'] = userId;
+        request.fields['data'] = '{"description":"' +
+            _deskripsiController.text +
+            '","user":' +
+            jsonEncode(data['pegawai']['user']) +
+            ',"lokasi":' +
+            jsonEncode(data['pegawai']['lokasi']) +
+            '}';
+        print(jsonEncode(data['pegawai']['user']));
+        //request.fields['guest_name'] = _namaController.text;
+        //request.fields['come_to'] = _tujuanController.text;
+        //request.fields['purpose'] = _keperluanController.text;
 
         request.files.add(multipartFile);
-
+        request.headers.addAll({'x-access-token': data['accessToken']});
         final response = await request.send();
 
         final totalBytes = response.contentLength;
+        print("total bytes");
         print(totalBytes);
         await response.stream.listen(
           (List<int> event) {
             final sentBytes = event.length;
-            print('sent $sentBytes');
+            // print('sent $sentBytes');
             //_updateProgress(sentBytes, totalBytes!);
           },
           onDone: () {
             //print(response.statusCode);
-            if (response.statusCode == 201) {
+            //print(response.request);
+
+            if (response.statusCode == 200) {
               // Upload completed successfully
               //Navigator.pop(context);
               //widget.onClose();
@@ -119,6 +110,7 @@ class _FormPatroliState extends State<FormPatroli> {
               Navigator.pop(context);
             } else {
               // Handle API error response
+              print(response.reasonPhrase);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Data gagal dikirim'),
@@ -138,6 +130,7 @@ class _FormPatroliState extends State<FormPatroli> {
           },
           onError: (error) {
             // Handle upload error
+            // print(error);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Terjadi Error..'),
@@ -157,7 +150,7 @@ class _FormPatroliState extends State<FormPatroli> {
       }
     } catch (e) {
       // Menangani kesalahan yang terjadi saat mengunggah gambar
-      print(e);
+      //print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Oops.. Error terjadi..'),
@@ -176,7 +169,7 @@ class _FormPatroliState extends State<FormPatroli> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Isian Patroli'),
+        title: const Text('Form Patroli'),
         centerTitle: true,
       ),
       body: Padding(
@@ -187,102 +180,14 @@ class _FormPatroliState extends State<FormPatroli> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(
-                  controller: TextEditingController(text: widget.name),
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: 'Nama Check Point',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Masukkan Situasi';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _barcodeController,
-                  decoration: InputDecoration(
-                    labelText: 'Validasi Barcode',
-                    suffixIcon: Icon(Icons.qr_code),
-                  ),
-                  readOnly: true,
-                  onTap: () async {
-                    //() async {
-                    String barcode = await FlutterBarcodeScanner.scanBarcode(
-                      "#000000",
-                      "CANCEL",
-                      true,
-                      ScanMode.QR,
-                    );
-                    print(barcode);
-
-                    /*
-                Map<String, dynamic> hasil =
-                    await controller.getProductById(barcode);
-                    
-                if (hasil["error"] == false) {
-                  Get.toNamed(Routes.detailProduct, arguments: hasil["data"]);
-                } else {
-                  Get.snackbar(
-                    "Error",
-                    hasil["message"],
-                    duration: const Duration(seconds: 2),
-                  );
-                }
-              };
-              */
-                  },
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Scan QR Code';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _situasiController,
-                  decoration: InputDecoration(
-                    labelText: 'Situasi',
-                  ),
-                  maxLines: 2,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Masukkan Situasi';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                _image1 != null
+                _image != null
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.file(
                             //to show image, you type like this.
-                            File(_image1!.path),
-                            fit: BoxFit.cover,
-                            width: MediaQuery.of(context).size.width,
-                            height: 200,
-                          ),
-                        ),
-                      )
-                    : Container(),
-                ElevatedButton(
-                  onPressed: () => _openCamera(context),
-                  child: Text('Ambil Photo 1'),
-                ),
-                _image2 != null
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            //to show image, you type like this.
-                            File(_image2!.path),
+                            File(_image!.path),
                             fit: BoxFit.cover,
                             width: MediaQuery.of(context).size.width,
                             height: 200,
@@ -293,20 +198,44 @@ class _FormPatroliState extends State<FormPatroli> {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () => _openCamera(context),
-                  child: Text('Ambil Photo 2'),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: Text('Ambil Photo'),
+                ),
+                TextFormField(
+                  controller: _deskripsiController,
+                  decoration: InputDecoration(
+                    labelText: 'Deskripsi',
+                  ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Masukkan Deskripsi';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(height: 10),
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.all(8.0),
                   child: ElevatedButton(
-                    onPressed: _image1 == null || _isUploading
+                    onPressed: _image == null || _isUploading
                         ? null
                         : () {
                             if (_formKey.currentState!.validate()) {
                               _uploadData();
                             }
                           },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(20),
+                    ),
                     child: Text(_isUploading ? 'Processing..' : 'Simpan'),
                   ),
                 ),

@@ -1,50 +1,46 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:kjm_security/model/paket.dart';
 import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FormTamu extends StatefulWidget {
-  const FormTamu({super.key});
+class FormPaketAmbil extends StatefulWidget {
+  final Paketan paketan;
+
+  final Function refreshListCallback;
+  const FormPaketAmbil(
+      {super.key, required this.paketan, required this.refreshListCallback});
 
   @override
-  State<FormTamu> createState() => _FormTamuState();
+  State<FormPaketAmbil> createState() => _FormPaketAmbilState();
 }
 
-class _FormTamuState extends State<FormTamu> {
+class _FormPaketAmbilState extends State<FormPaketAmbil> {
   final _formKey = GlobalKey<FormState>();
   XFile? _image;
+  final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
 
-  final ImagePicker _picker = ImagePicker();
+  String apiUrl = 'https://satukomando.id/api-prod/paket/ambil';
+
   TextEditingController _namaController = TextEditingController();
-  TextEditingController _tujuanController = TextEditingController();
-  TextEditingController _keperluanController = TextEditingController();
+  TextEditingController _alamatController = TextEditingController();
+  TextEditingController _hpController = TextEditingController();
+
   @override
   void dispose() {
     // Dispose any resources used by the image picker
     super.dispose();
   }
 
-  Future<void> _openCamera(BuildContext context) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-
-    if (image != null) {
-      setState(() {
-        _image = image;
-      });
-      //File imageFile = File(image.path);
-      //_uploadImage(imageFile, context);
-    }
-  }
-
   Future<void> _uploadData() async {
     //String apiUrl = 'https://geoportal.big.go.id/api-dev/file/upload';
-    String apiUrl = 'https://satukomando.id/api-prod/bukutamu/datang';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String user = prefs.getString('user') ?? '';
     var data = jsonDecode(user);
@@ -56,7 +52,8 @@ class _FormTamuState extends State<FormTamu> {
 
     try {
       if (_image != null) {
-        final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+        final request = http.MultipartRequest(
+            'PUT', Uri.parse(apiUrl + "/" + widget.paketan.uuid));
 
         final stream = http.ByteStream(_image!.openRead());
         final length = await _image!.length();
@@ -67,39 +64,29 @@ class _FormTamuState extends State<FormTamu> {
           length,
           filename: path.basename(_image!.path),
         );
-        request.fields['data'] = '{"namaTamu":"' +
-            _namaController.text +
-            '","tujuan":"' +
-            _tujuanController.text +
-            '","keperluan":"' +
-            _keperluanController.text +
-            '","user":' +
-            jsonEncode(data['pegawai']['user']) +
-            ',"lokasi":' +
-            jsonEncode(data['pegawai']['lokasi']) +
-            '}';
-        print(jsonEncode(data['pegawai']['user']));
-        //request.fields['guest_name'] = _namaController.text;
-        //request.fields['come_to'] = _tujuanController.text;
-        //request.fields['purpose'] = _keperluanController.text;
 
+        /*request.fields['recipient'] = _namaController.text;
+        request.fields['address'] = _alamatController.text;
+        request.fields['hp'] = _hpController.text;
+        request.fields['user_id'] = userId;
+        */
+        request.fields['user'] = jsonEncode(data['pegawai']['user']);
+        print(apiUrl + "/" + widget.paketan.uuid);
+        print(jsonEncode(data['pegawai']['user']));
         request.files.add(multipartFile);
         request.headers.addAll({'x-access-token': data['accessToken']});
         final response = await request.send();
 
         final totalBytes = response.contentLength;
-        print("total bytes");
         print(totalBytes);
         await response.stream.listen(
           (List<int> event) {
             final sentBytes = event.length;
-            // print('sent $sentBytes');
+            print('sent $sentBytes');
             //_updateProgress(sentBytes, totalBytes!);
           },
           onDone: () {
             //print(response.statusCode);
-            //print(response.request);
-
             if (response.statusCode == 200) {
               // Upload completed successfully
               //Navigator.pop(context);
@@ -136,7 +123,6 @@ class _FormTamuState extends State<FormTamu> {
           },
           onError: (error) {
             // Handle upload error
-            // print(error);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Terjadi Error..'),
@@ -156,7 +142,7 @@ class _FormTamuState extends State<FormTamu> {
       }
     } catch (e) {
       // Menangani kesalahan yang terjadi saat mengunggah gambar
-      //print(e);
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Oops.. Error terjadi..'),
@@ -166,16 +152,33 @@ class _FormTamuState extends State<FormTamu> {
           backgroundColor: Colors.red,
         ),
       );
+      setState(() {
+        _isUploading = false;
+        //_uploadProgress = 0.0;
+        //_image = null;
+      });
     }
 
     //Navigator.of(context).pop();
+  }
+
+  Future<void> _openCamera(BuildContext context) async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+
+    if (image != null) {
+      setState(() {
+        _image = image;
+      });
+      //File imageFile = File(image.path);
+      //_uploadImage(imageFile, context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Isian Buku Tamu'),
+        title: const Text('Form Isian Ambil Paket'),
         centerTitle: true,
       ),
       body: Padding(
@@ -186,6 +189,64 @@ class _FormTamuState extends State<FormTamu> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                /* FutureBuilder<void>(
+                  future: retrieveLostData(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<void> snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.none:
+                      case ConnectionState.waiting:
+                        return const Text(
+                          'You have not yet picked an image.',
+                          textAlign: TextAlign.center,
+                        );
+                      case ConnectionState.done:
+                        return const Text(
+                          'Done.',
+                          textAlign: TextAlign.center,
+                        );
+                      case ConnectionState.active:
+                        if (snapshot.hasError) {
+                          return Text(
+                            'Pick image/video error: ${snapshot.error}}',
+                            textAlign: TextAlign.center,
+                          );
+                        } else {
+                          return const Text(
+                            'You have not yet picked an image.',
+                            textAlign: TextAlign.center,
+                          );
+                        }
+                    }
+                  },
+                ),*/
+                /*_image != null
+                    ? Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: _image != null
+                              ? DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: FileImage(File(_image!.path)),
+                                )
+                              : null,
+                        ),
+                      )
+                    : const CircleAvatar(
+                        radius: 100,
+                        backgroundColor: Color.fromARGB(255, 164, 222, 249),
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 50,
+                        )),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _getImageFromCamera,
+                  child: Text('Ambil Photo'),
+                ),
+                */
                 _image != null
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -205,6 +266,7 @@ class _FormTamuState extends State<FormTamu> {
                 ElevatedButton(
                   onPressed: () => _openCamera(context),
                   style: ElevatedButton.styleFrom(
+                    //backgroundColor: AppColors.secondaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -213,42 +275,52 @@ class _FormTamuState extends State<FormTamu> {
                   child: Text('Ambil Photo'),
                 ),
                 TextFormField(
-                  controller: _namaController,
-                  decoration: InputDecoration(
-                    labelText: 'Nama Tamu',
+                  //controller: _namaController,
+                  initialValue: widget.paketan.namaPenerima,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Nama Tamu';
+                      return 'Masukkan Nama';
                     }
                     return null;
                   },
                 ),
                 TextFormField(
-                  controller: _tujuanController,
-                  decoration: InputDecoration(
-                    labelText: 'Tujuan',
+                  //controller: _alamatController,
+                  initialValue: widget.paketan.alamat,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Alamat',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Tujuan';
+                      return 'Masukkan Alamat';
                     }
                     return null;
                   },
                 ),
                 TextFormField(
-                  controller: _keperluanController,
-                  decoration: InputDecoration(
-                    labelText: 'Keperluan',
+                  //controller: _hpController,
+                  initialValue: widget.paketan.hp,
+                  readOnly: true,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Hp',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Keperluan';
+                      return 'Masukkan Hp';
                     }
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.all(8.0),
@@ -261,6 +333,7 @@ class _FormTamuState extends State<FormTamu> {
                             }
                           },
                     style: ElevatedButton.styleFrom(
+                      //backgroundColor: AppColors.secondaryColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -274,27 +347,6 @@ class _FormTamuState extends State<FormTamu> {
           ),
         ),
       ),
-      /*actions: [
-        ElevatedButton(
-          onPressed: _isUploading
-              ? null
-              : () {
-                  Navigator.of(context).pop();
-                },
-          child: Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _isUploading
-              ? null
-              : () {
-                  if (_formKey.currentState!.validate()) {
-                    _uploadData();
-                  }
-                },
-          child: Text(_isUploading ? 'Processing..' : 'Submit'),
-        ),
-      ],*/
-      // Validasi berhasil
     );
   }
 }

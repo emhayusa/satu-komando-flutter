@@ -1,43 +1,43 @@
 import 'package:kjm_security/model/lokasi.dart';
 import 'package:kjm_security/model/reporter.dart';
 
-class Paketan {
+class Bukutamu {
   String uuid;
-  String namaPenerima;
-  String alamat;
-  String hp;
+  String namaTamu;
+  String tujuan;
+  String keperluan;
   DateTime tanggal;
   DateTime waktuDatang;
-  dynamic waktuAmbil;
+  DateTime? waktuPulang;
   DateTime createdAt;
   Reporter user;
   Lokasi lokasi;
   Reporter? reporter;
 
-  Paketan({
+  Bukutamu({
     required this.uuid,
-    required this.namaPenerima,
-    required this.alamat,
-    required this.hp,
+    required this.namaTamu,
+    required this.tujuan,
+    required this.keperluan,
     required this.tanggal,
     required this.waktuDatang,
-    required this.waktuAmbil,
+    this.waktuPulang,
     required this.createdAt,
     required this.user,
     required this.lokasi,
-    required this.reporter,
+    this.reporter,
   });
 
-  factory Paketan.fromJson(Map<String, dynamic> json) => Paketan(
+  factory Bukutamu.fromJson(Map<String, dynamic> json) => Bukutamu(
         uuid: json["uuid"],
-        namaPenerima: json["namaPenerima"],
-        alamat: json["alamat"],
-        hp: json["hp"],
+        namaTamu: json["namaTamu"],
+        tujuan: json["tujuan"],
+        keperluan: json["keperluan"],
         tanggal: DateTime.parse(json["tanggal"]),
         waktuDatang: DateTime.parse(json["waktuDatang"]),
-        waktuAmbil: json["waktuAmbil"] == null
+        waktuPulang: json["waktuPulang"] == null
             ? null
-            : DateTime.parse(json["waktuAmbil"]),
+            : DateTime.parse(json["waktuPulang"]),
         createdAt: DateTime.parse(json["createdAt"]),
         user: Reporter.fromJson(json["user"]),
         lokasi: Lokasi.fromJson(json["lokasi"]),
@@ -48,13 +48,13 @@ class Paketan {
 
   Map<String, dynamic> toJson() => {
         "uuid": uuid,
-        "namaPenerima": namaPenerima,
-        "alamat": alamat,
-        "hp": hp,
+        "namaTamu": namaTamu,
+        "tujuan": tujuan,
+        "keperluan": keperluan,
         "tanggal":
             "${tanggal.year.toString().padLeft(4, '0')}-${tanggal.month.toString().padLeft(2, '0')}-${tanggal.day.toString().padLeft(2, '0')}",
         "waktuDatang": waktuDatang.toIso8601String(),
-        "waktuAmbil": waktuAmbil,
+        "waktuPulang": waktuPulang?.toIso8601String(),
         "createdAt": createdAt.toIso8601String(),
         "user": user.toJson(),
         "lokasi": lokasi.toJson(),

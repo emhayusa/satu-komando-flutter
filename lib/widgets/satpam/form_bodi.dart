@@ -4,26 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FormTamu extends StatefulWidget {
-  const FormTamu({super.key});
+class FormBody extends StatefulWidget {
+  const FormBody({super.key});
 
   @override
-  State<FormTamu> createState() => _FormTamuState();
+  State<FormBody> createState() => _FormBodyState();
 }
 
-class _FormTamuState extends State<FormTamu> {
+class _FormBodyState extends State<FormBody> {
   final _formKey = GlobalKey<FormState>();
   XFile? _image;
   bool _isUploading = false;
+  String apiUrl = 'https://satukomando.id/api-prod/working/body';
 
   final ImagePicker _picker = ImagePicker();
-  TextEditingController _namaController = TextEditingController();
-  TextEditingController _tujuanController = TextEditingController();
-  TextEditingController _keperluanController = TextEditingController();
+  TextEditingController _deskripsiController = TextEditingController();
   @override
   void dispose() {
     // Dispose any resources used by the image picker
@@ -44,7 +42,7 @@ class _FormTamuState extends State<FormTamu> {
 
   Future<void> _uploadData() async {
     //String apiUrl = 'https://geoportal.big.go.id/api-dev/file/upload';
-    String apiUrl = 'https://satukomando.id/api-prod/bukutamu/datang';
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String user = prefs.getString('user') ?? '';
     var data = jsonDecode(user);
@@ -67,12 +65,8 @@ class _FormTamuState extends State<FormTamu> {
           length,
           filename: path.basename(_image!.path),
         );
-        request.fields['data'] = '{"namaTamu":"' +
-            _namaController.text +
-            '","tujuan":"' +
-            _tujuanController.text +
-            '","keperluan":"' +
-            _keperluanController.text +
+        request.fields['data'] = '{"description":"' +
+            _deskripsiController.text +
             '","user":' +
             jsonEncode(data['pegawai']['user']) +
             ',"lokasi":' +
@@ -175,7 +169,7 @@ class _FormTamuState extends State<FormTamu> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Isian Buku Tamu'),
+        title: const Text('Form Pengecekan Bodi'),
         centerTitle: true,
       ),
       body: Padding(
@@ -213,37 +207,13 @@ class _FormTamuState extends State<FormTamu> {
                   child: Text('Ambil Photo'),
                 ),
                 TextFormField(
-                  controller: _namaController,
+                  controller: _deskripsiController,
                   decoration: InputDecoration(
-                    labelText: 'Nama Tamu',
+                    labelText: 'Deskripsi',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Nama Tamu';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _tujuanController,
-                  decoration: InputDecoration(
-                    labelText: 'Tujuan',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Masukkan Tujuan';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _keperluanController,
-                  decoration: InputDecoration(
-                    labelText: 'Keperluan',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Masukkan Keperluan';
+                      return 'Masukkan Deskripsi';
                     }
                     return null;
                   },

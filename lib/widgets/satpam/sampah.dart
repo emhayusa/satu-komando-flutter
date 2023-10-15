@@ -6,19 +6,20 @@ import 'package:kjm_security/model/insiden.dart';
 import 'package:kjm_security/model/patroli.dart';
 import 'package:kjm_security/widgets/satpam/detail_kejadian.dart';
 import 'package:kjm_security/widgets/satpam/form_patroli.dart';
+import 'package:kjm_security/widgets/satpam/form_sampah.dart';
 import 'dart:convert';
 
 import 'package:kjm_security/widgets/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Patroli extends StatefulWidget {
-  const Patroli({super.key});
+class Sampah extends StatefulWidget {
+  const Sampah({super.key});
 
   @override
-  State<Patroli> createState() => _PatroliState();
+  State<Sampah> createState() => _SampahState();
 }
 
-class _PatroliState extends State<Patroli> {
+class _SampahState extends State<Sampah> {
   late DateTime selectedDate;
   bool isLoading = false;
   TextEditingController searchController = TextEditingController();
@@ -32,8 +33,8 @@ class _PatroliState extends State<Patroli> {
   List<Patrolian> filteredDatas = [];
 
   //String apiUrl = 'https://geoportal.big.go.id/api-dev/check-points/kantor/';
-  String apiUrl = 'https://satukomando.id/api-prod/patroli/';
-  String apiView = 'https://satukomando.id/api-prod/patroli/photo/';
+  String apiUrl = 'https://satukomando.id/api-prod/working/sampah/';
+  String apiView = 'https://satukomando.id/api-prod/working/photo/';
 
   @override
   void initState() {
@@ -105,10 +106,10 @@ class _PatroliState extends State<Patroli> {
     });
   }
 
-  void navigateToFormPatroli() async {
+  void navigateToFormSampah() async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => FormPatroli()),
+      MaterialPageRoute(builder: (context) => FormSampah()),
     );
     fetchData(); // Refresh the items when returning from the second widget
   }
@@ -117,7 +118,7 @@ class _PatroliState extends State<Patroli> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Patroli'),
+        title: const Text('Pengecekan Sampah'),
         centerTitle: true,
       ),
       body: RefreshIndicator(
@@ -189,7 +190,7 @@ class _PatroliState extends State<Patroli> {
               width: double.infinity,
               margin: EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: navigateToFormPatroli,
+                onPressed: navigateToFormSampah,
                 style: ElevatedButton.styleFrom(
                   //backgroundColor: AppColors.secondaryColor,
                   shape: RoundedRectangleBorder(
@@ -197,7 +198,7 @@ class _PatroliState extends State<Patroli> {
                   ),
                   padding: const EdgeInsets.all(20),
                 ),
-                child: Text('Laporkan Patroli'),
+                child: Text('Laporkan Pengecekan Sampah'),
               ),
             ),
           ],

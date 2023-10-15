@@ -1,35 +1,34 @@
-class Patroli {
-  String code;
-  DateTime permissionDate;
-  DateTime createdAt;
-  String? notes;
-  String? status;
-  String? updatedBy;
+import 'package:kjm_security/model/lokasi.dart';
+import 'package:kjm_security/model/reporter.dart';
 
-  Patroli({
-    required this.code,
-    required this.permissionDate,
+class Patrolian {
+  String uuid;
+  String description;
+  DateTime createdAt;
+  Lokasi lokasi;
+  Reporter user;
+
+  Patrolian({
+    required this.uuid,
+    required this.description,
     required this.createdAt,
-    this.notes,
-    this.status,
-    this.updatedBy,
+    required this.lokasi,
+    required this.user,
   });
 
-  factory Patroli.fromJson(Map<String, dynamic> json) => Patroli(
-        code: json["code"],
-        permissionDate: DateTime.parse(json["permission_date"]),
-        createdAt: DateTime.parse(json["created_at"]),
-        notes: json["notes"],
-        status: json["status"],
-        updatedBy: json["updated_by"],
+  factory Patrolian.fromJson(Map<String, dynamic> json) => Patrolian(
+        uuid: json["uuid"],
+        description: json["description"],
+        createdAt: DateTime.parse(json["createdAt"]),
+        lokasi: Lokasi.fromJson(json["lokasi"]),
+        user: Reporter.fromJson(json["user"]),
       );
 
   Map<String, dynamic> toJson() => {
-        "code": code,
-        "permission_date": permissionDate.toIso8601String(),
-        "created_at": createdAt.toIso8601String(),
-        "notes": notes,
-        "status": status,
-        "updated_by": updatedBy,
+        "uuid": uuid,
+        "description": description,
+        "createdAt": createdAt.toIso8601String(),
+        "lokasi": lokasi.toJson(),
+        "user": user.toJson(),
       };
 }

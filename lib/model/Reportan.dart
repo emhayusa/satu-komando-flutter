@@ -2,8 +2,7 @@ import 'package:kjm_security/model/lokasi.dart';
 import 'package:kjm_security/model/reportType.dart';
 import 'package:kjm_security/model/reporter.dart';
 
-class Laporan {
-  int id;
+class Reportan {
   String uuid;
   String description;
   DateTime createdAt;
@@ -11,8 +10,7 @@ class Laporan {
   Lokasi lokasi;
   Reporter user;
 
-  Laporan({
-    required this.id,
+  Reportan({
     required this.uuid,
     required this.description,
     required this.createdAt,
@@ -21,8 +19,7 @@ class Laporan {
     required this.user,
   });
 
-  factory Laporan.fromJson(Map<String, dynamic> json) => Laporan(
-        id: json["id"],
+  factory Reportan.fromJson(Map<String, dynamic> json) => Reportan(
         uuid: json["uuid"],
         description: json["description"],
         createdAt: DateTime.parse(json["createdAt"]),
@@ -32,7 +29,6 @@ class Laporan {
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
         "uuid": uuid,
         "description": description,
         "createdAt": createdAt.toIso8601String(),

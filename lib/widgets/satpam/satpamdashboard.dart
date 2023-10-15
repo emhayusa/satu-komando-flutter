@@ -11,6 +11,7 @@ import 'package:kjm_security/widgets/satpam/paket.dart';
 import 'package:kjm_security/widgets/satpam/patroli.dart';
 import 'package:kjm_security/widgets/satpam/presensi.dart';
 import 'package:kjm_security/widgets/satpam/sos.dart';
+import 'package:kjm_security/widgets/satpam/working.dart';
 import 'package:kjm_security/widgets/top_background.dart';
 
 class SatpamDashboard extends StatelessWidget {
@@ -76,71 +77,12 @@ class SatpamDashboard extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Presensi()),
+                                    builder: (context) => Kehadiran()),
                               );
                             },
                             child: ItemKategori(
                               title: "Presensi",
                               icon: "assets/icons/presensi.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => Ijin()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Ijin",
-                              icon: "assets/icons/todo.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Patroli()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Patroli",
-                              icon: "assets/icons/patroli.png",
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              // Get.toNamed(Routes.DATA)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Kehadiran()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Kehadiran",
-                              icon: "assets/icons/news.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              //Get.toNamed(Routes.DINAS)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Paket()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Paket",
-                              icon: "assets/icons/activity.png",
                             ),
                           ),
                           InkWell(
@@ -155,26 +97,6 @@ class SatpamDashboard extends StatelessWidget {
                             child: ItemKategori(
                               title: "Buku Tamu",
                               icon: "assets/icons/book.png",
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              //Get.toNamed(Routes.TANYA)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Kejadian()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Pesan",
-                              icon: "assets/icons/message.png",
                             ),
                           ),
                           InkWell(
@@ -193,6 +115,119 @@ class SatpamDashboard extends StatelessWidget {
                           ),
                           InkWell(
                             onTap: () {
+                              //Get.toNamed(Routes.DINAS)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Paket()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Paket",
+                              icon: "assets/icons/activity.png",
+                            ),
+                          ),
+                          /*
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Ijin()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Ijin",
+                              icon: "assets/icons/todo.png",
+                            ),
+                          ),*/
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Patroli()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Patroli",
+                              icon: "assets/icons/patroli.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              // Get.toNamed(Routes.DATA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Working()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Work Instruction",
+                              icon: "assets/icons/news.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.TANYA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Lokasi()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Kendaraan",
+                              icon: "assets/icons/delivery.png",
+                            ),
+                          ),
+
+                          /*InkWell(
+                            onTap: () {
+                              // Get.toNamed(Routes.DATA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Kehadiran()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Kehadiran",
+                              icon: "assets/icons/news.png",
+                            ),
+                          ),*/
+                        ],
+                      ),
+                      /*
+                      SizedBox(height: 20),
+                      */
+                      /*
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          /*InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.TANYA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Kejadian()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Pesan",
+                              icon: "assets/icons/message.png",
+                            ),
+                          ),*/
+
+                          /*InkWell(
+                            onTap: () {
                               //Get.toNamed(Routes.SOS)
                               Navigator.push(
                                 context,
@@ -204,9 +239,11 @@ class SatpamDashboard extends StatelessWidget {
                               icon: "assets/icons/sos.png",
                             ),
                           ),
+                          */
                         ],
-                      ),
-                      SizedBox(height: 20),
+                      ),*/
+                      //SizedBox(height: 20),
+                      /*
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -225,7 +262,7 @@ class SatpamDashboard extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ),
+                      ),*/
                     ],
                   ),
                 ),

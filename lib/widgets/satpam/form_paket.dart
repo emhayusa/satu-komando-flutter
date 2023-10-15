@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,6 +22,8 @@ class _FormPaketState extends State<FormPaket> {
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
 
+  String apiUrl = 'https://satukomando.id/api-prod/paket/datang';
+
   TextEditingController _namaController = TextEditingController();
   TextEditingController _alamatController = TextEditingController();
   TextEditingController _hpController = TextEditingController();
@@ -32,9 +36,10 @@ class _FormPaketState extends State<FormPaket> {
 
   Future<void> _uploadData() async {
     //String apiUrl = 'https://geoportal.big.go.id/api-dev/file/upload';
-    String apiUrl = 'https://geoportal.big.go.id/api-dev/packages/';
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userId = prefs.getString('user_id') ?? '';
+    String user = prefs.getString('user') ?? '';
+    var data = jsonDecode(user);
+    print(data);
 
     setState(() {
       _isUploading = true;
@@ -48,19 +53,31 @@ class _FormPaketState extends State<FormPaket> {
         final length = await _image!.length();
 
         final multipartFile = http.MultipartFile(
-          'image',
+          'file',
           stream,
           length,
           filename: path.basename(_image!.path),
         );
 
-        request.fields['recipient'] = _namaController.text;
+        /*request.fields['recipient'] = _namaController.text;
         request.fields['address'] = _alamatController.text;
         request.fields['hp'] = _hpController.text;
         request.fields['user_id'] = userId;
-
+        */
+        request.fields['data'] = '{"namaPenerima":"' +
+            _namaController.text +
+            '","alamat":"' +
+            _alamatController.text +
+            '","hp":"' +
+            _hpController.text +
+            '","user":' +
+            jsonEncode(data['pegawai']['user']) +
+            ',"lokasi":' +
+            jsonEncode(data['pegawai']['lokasi']) +
+            '}';
+        print(jsonEncode(data['pegawai']['user']));
         request.files.add(multipartFile);
-
+        request.headers.addAll({'x-access-token': data['accessToken']});
         final response = await request.send();
 
         final totalBytes = response.contentLength;
@@ -73,7 +90,7 @@ class _FormPaketState extends State<FormPaket> {
           },
           onDone: () {
             //print(response.statusCode);
-            if (response.statusCode == 201) {
+            if (response.statusCode == 200) {
               // Upload completed successfully
               //Navigator.pop(context);
               //widget.onClose();
@@ -89,6 +106,7 @@ class _FormPaketState extends State<FormPaket> {
               Navigator.pop(context);
             } else {
               // Handle API error response
+              print(response.reasonPhrase);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Data gagal dikirim'),
@@ -137,6 +155,11 @@ class _FormPaketState extends State<FormPaket> {
           backgroundColor: Colors.red,
         ),
       );
+      setState(() {
+        _isUploading = false;
+        //_uploadProgress = 0.0;
+        //_image = null;
+      });
     }
 
     //Navigator.of(context).pop();
@@ -244,8 +267,16 @@ class _FormPaketState extends State<FormPaket> {
                     : Container(),
                 SizedBox(height: 10),
                 ElevatedButton(
-                    onPressed: () => _openCamera(context),
-                    child: Text('Ambil Photo')),
+                  onPressed: () => _openCamera(context),
+                  style: ElevatedButton.styleFrom(
+                    //backgroundColor: AppColors.secondaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(20),
+                  ),
+                  child: Text('Ambil Photo'),
+                ),
                 TextFormField(
                   controller: _namaController,
                   decoration: const InputDecoration(
@@ -298,6 +329,13 @@ class _FormPaketState extends State<FormPaket> {
                               _uploadData();
                             }
                           },
+                    style: ElevatedButton.styleFrom(
+                      //backgroundColor: AppColors.secondaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(20),
+                    ),
                     child: Text(_isUploading ? 'Processing..' : 'Simpan'),
                   ),
                 ),
