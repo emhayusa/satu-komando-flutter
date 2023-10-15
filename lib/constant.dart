@@ -3,4 +3,4 @@ String API_LOGIN = '$BASE/auth/signin';
 String API_VALID = '$BASE/auth/valid';
 String API_LOGOUT = '$BASE/auth/logout';
 String API_PASSWORD = '$BASE/auth/password';
-String API_PROFILE = '$BASE/employees';
+String API_PROFILE = '$BASE/pegawai';

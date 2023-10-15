@@ -31,9 +31,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String userId = prefs.getString('user_id') ?? '';
-      print(userId);
-      final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
+      String user = prefs.getString('user') ?? '';
+      var _data = jsonDecode(user);
+      print(_data);
+      Profile _profile = Profile.fromJson(_data);
+
+      setState(() {
+        data = _profile;
+      });
+      /*
+      final response = await http.get(Uri.parse('$API_PROFILE/'+ ));
       if (response.statusCode == 200) {
         print(response.body);
         //print(json.decode(response.body));
@@ -50,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else {
         print('Gagal mengambil data profile');
       }
+      */
     } catch (e) {
       print('Terjadi kesalahan saat mengambil data profile: $e');
     }

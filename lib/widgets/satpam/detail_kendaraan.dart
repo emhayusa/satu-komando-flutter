@@ -36,6 +36,14 @@ class _DetailKendaraanState extends State<DetailKendaraan> {
   //String apiAmbil = 'https://geoportal.big.go.id/api-dev/packages/ambil/';
   String apiUrl = 'https://satukomando.id/api-prod/kendaraan/';
   String apiView = 'https://satukomando.id/api-prod/kendaraan/photoDatang/';
+  String apiViewSealIn =
+      'https://satukomando.id/api-prod/kendaraan/photoSealIn/';
+  String apiViewBongkar =
+      'https://satukomando.id/api-prod/kendaraan/photoBongkar/';
+  String apiViewSelesaiBongkar =
+      'https://satukomando.id/api-prod/kendaraan/photoSelesaiBongkar/';
+  String apiViewSealOut =
+      'https://satukomando.id/api-prod/kendaraan/photoSealOut/';
   String apiViewKeluar =
       'https://satukomando.id/api-prod/kendaraan/photoKeluar/';
 
@@ -51,20 +59,20 @@ class _DetailKendaraanState extends State<DetailKendaraan> {
       appBar: AppBar(
         title: Text('Detail Kendaraan'),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Card(
           margin: EdgeInsets.all(16.0),
           child: Column(
             children: [
               SizedBox(height: 16.0),
               Text(
-                '${widget.kendaraan.noPolisi}',
+                'No Polisi: ${widget.kendaraan.noPolisi}',
                 style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8.0),
               ListTile(
                 leading: Icon(Icons.home),
-                title: Text(widget.kendaraan.noSurat),
+                title: Text("No Surat: " + widget.kendaraan.noSurat),
               ),
               ListTile(
                 leading: Icon(Icons.mobile_friendly),
@@ -72,18 +80,54 @@ class _DetailKendaraanState extends State<DetailKendaraan> {
               ),
               ListTile(
                 leading: Icon(Icons.access_time),
-                title: Text(DateFormat('dd MMM yyyy, hh:mm:ss a')
-                    .format(widget.kendaraan.waktuDatang.toLocal())),
+                title: Text("Datang: " +
+                    DateFormat('dd MMM yyyy, hh:mm:ss a')
+                        .format(widget.kendaraan.waktuDatang.toLocal())),
               ),
               widget.kendaraan.uuid != "code"
                   ? buildImageFromUrl('$apiView${widget.kendaraan.uuid}', 150.0)
                   : Container(),
               ListTile(
                 leading: Icon(Icons.access_alarms),
-                title: Text(
+                title: Text('Seal In: ' +
+                    '${widget.kendaraan.waktuSealIn == null ? '-' : DateFormat('dd MMM yyyy, hh:mm:ss a').format(widget.kendaraan.waktuSealIn!.toLocal())}'),
+              ),
+              widget.kendaraan.uuid != "code"
+                  ? buildImageFromUrl(
+                      '$apiViewSealIn${widget.kendaraan.uuid}', 150.0)
+                  : Container(),
+              ListTile(
+                leading: Icon(Icons.access_alarms),
+                title: Text('Bongkar: ' +
+                    '${widget.kendaraan.waktuBongkar == null ? '-' : DateFormat('dd MMM yyyy, hh:mm:ss a').format(widget.kendaraan.waktuBongkar!.toLocal())}'),
+              ),
+              widget.kendaraan.uuid != "code"
+                  ? buildImageFromUrl(
+                      '$apiViewBongkar${widget.kendaraan.uuid}', 150.0)
+                  : Container(),
+              ListTile(
+                leading: Icon(Icons.access_alarms),
+                title: Text('Selesai Bongkar: ' +
+                    '${widget.kendaraan.waktuSelesaiBongkar == null ? '-' : DateFormat('dd MMM yyyy, hh:mm:ss a').format(widget.kendaraan.waktuSelesaiBongkar!.toLocal())}'),
+              ),
+              widget.kendaraan.uuid != "code"
+                  ? buildImageFromUrl(
+                      '$apiViewSelesaiBongkar${widget.kendaraan.uuid}', 150.0)
+                  : Container(),
+              ListTile(
+                leading: Icon(Icons.access_alarms),
+                title: Text('Seal Out: ' +
+                    '${widget.kendaraan.waktuSealOut == null ? '-' : DateFormat('dd MMM yyyy, hh:mm:ss a').format(widget.kendaraan.waktuSealOut!.toLocal())}'),
+              ),
+              widget.kendaraan.uuid != "code"
+                  ? buildImageFromUrl(
+                      '$apiViewSealOut${widget.kendaraan.uuid}', 150.0)
+                  : Container(),
+              ListTile(
+                leading: Icon(Icons.access_alarms),
+                title: Text('Keluar: ' +
                     '${widget.kendaraan.waktuKeluar == null ? '-' : DateFormat('dd MMM yyyy, hh:mm:ss a').format(widget.kendaraan.waktuKeluar!.toLocal())}'),
               ),
-              SizedBox(height: 16.0),
               widget.kendaraan.waktuKeluar == null
                   ? Container(
                       padding: EdgeInsets.all(16.0),
@@ -92,18 +136,23 @@ class _DetailKendaraanState extends State<DetailKendaraan> {
                         "Kendaraan belum keluar",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ))
-                  : Column(children: [
-                      buildImageFromUrl(
-                          '$apiViewKeluar${widget.kendaraan.uuid}', 150.0),
-                      SizedBox(height: 20.0),
-                      Container(
-                          padding: EdgeInsets.all(16),
-                          color: Colors.green,
-                          child: Text(
-                            "Kendaraan sudah keluar",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          )),
-                    ]),
+                  : Column(
+                      children: [
+                        buildImageFromUrl(
+                            '$apiViewKeluar${widget.kendaraan.uuid}', 150.0),
+                        SizedBox(height: 20.0),
+                        Container(
+                            padding: EdgeInsets.all(16),
+                            color: Colors.green,
+                            child: Text(
+                              "Kendaraan sudah keluar",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
+                        SizedBox(
+                          height: 30,
+                        ),
+                      ],
+                    ),
             ],
           ),
         ),
