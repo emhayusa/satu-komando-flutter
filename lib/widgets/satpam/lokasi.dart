@@ -10,6 +10,7 @@ import 'package:kjm_security/widgets/satpam/form_tamu.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:kjm_security/widgets/satpam/kendaraan.dart';
+import 'package:kjm_security/widgets/satpam/kendaraanLM.dart';
 import 'dart:convert';
 
 import 'package:kjm_security/widgets/utils.dart';
@@ -183,21 +184,24 @@ class _LokasiState extends State<Lokasi> {
                 title = "First Mile (FM)";
                 icon = Icons.dashboard;
                 onTap = () async {
+                  /*
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => FormKendaraanInbound()),
+                    MaterialPageRoute(builder: (context) => KendaraanFM()),
                   );
+                  */
                 };
                 break;
               case 1:
                 title = "Data Center (DC)";
                 icon = Icons.view_in_ar;
                 onTap = () async {
-                  //await Navigator.push(
-                  //  context,
-                  //  MaterialPageRoute(builder: (context) => FormKendaraanOutbond()),
-                  //);
+                  /*
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => KendaraanDC()),
+                  );
+                  */
                 };
                 break;
               case 2:
@@ -206,7 +210,7 @@ class _LokasiState extends State<Lokasi> {
                 onTap = () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Kendaraan()),
+                    MaterialPageRoute(builder: (context) => KendaraanLM()),
                   );
                 };
                 break;

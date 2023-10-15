@@ -6,6 +6,7 @@ import 'package:kjm_security/widgets/satpam/ijin.dart';
 import 'package:kjm_security/widgets/satpam/kehadiran.dart';
 import 'package:kjm_security/widgets/satpam/kejadian.dart';
 import 'package:kjm_security/widgets/satpam/kendaraan.dart';
+import 'package:kjm_security/widgets/satpam/kendaraanLM.dart';
 import 'package:kjm_security/widgets/satpam/lokasi.dart';
 import 'package:kjm_security/widgets/satpam/paket.dart';
 import 'package:kjm_security/widgets/satpam/patroli.dart';
@@ -179,7 +180,7 @@ class SatpamDashboard extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Lokasi()),
+                                    builder: (context) => KendaraanLM()),
                               );
                             },
                             child: ItemKategori(
