@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
               context,
               MaterialPageRoute(builder: (context) => HomePage()),
             );
-          } else if (data['roles'][0] == 'ROLE_ADMIN') {
+          } else if (data['roles'][0] == 'admin') {
             // Pindah ke halaman utama (setelah login berhasil)
             Navigator.pushReplacement(
               context,
@@ -241,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 20,
             ),
 
-            Center(child: Text("Version: 0.1.3")),
+            Center(child: Text("Version: 0.1.4")),
             //TextButton(
             //  onPressed: () {},
             //  child: Text("forgot password?"),

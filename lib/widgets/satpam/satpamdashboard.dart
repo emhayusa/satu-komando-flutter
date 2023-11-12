@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:kjm_security/widgets/clock.dart';
 import 'package:kjm_security/widgets/item_kategori.dart';
 import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
-import 'package:kjm_security/widgets/satpam/ijin.dart';
 import 'package:kjm_security/widgets/satpam/kehadiran.dart';
 import 'package:kjm_security/widgets/satpam/kejadian.dart';
-import 'package:kjm_security/widgets/satpam/kendaraan.dart';
-import 'package:kjm_security/widgets/satpam/kendaraanLM.dart';
-import 'package:kjm_security/widgets/satpam/lokasi.dart';
+import 'package:kjm_security/widgets/satpam/kunjungan.dart';
 import 'package:kjm_security/widgets/satpam/paket.dart';
+import 'package:kjm_security/widgets/satpam/parkir.dart';
 import 'package:kjm_security/widgets/satpam/patroli.dart';
-import 'package:kjm_security/widgets/satpam/presensi.dart';
-import 'package:kjm_security/widgets/satpam/sos.dart';
-import 'package:kjm_security/widgets/satpam/working.dart';
+import 'package:kjm_security/widgets/satpam/working_instruction.dart';
 import 'package:kjm_security/widgets/top_background.dart';
 
 class SatpamDashboard extends StatelessWidget {
@@ -75,19 +71,6 @@ class SatpamDashboard extends StatelessWidget {
                         children: [
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Kehadiran()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Presensi",
-                              icon: "assets/icons/presensi.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
                               //Get.toNamed(Routes.SERVICES)
                               Navigator.push(
                                 context,
@@ -98,6 +81,20 @@ class SatpamDashboard extends StatelessWidget {
                             child: ItemKategori(
                               title: "Buku Tamu",
                               icon: "assets/icons/book.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.TANYA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Kunjungan()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Kunjungan",
+                              icon: "assets/icons/supervisor.png",
                             ),
                           ),
                           InkWell(
@@ -149,6 +146,20 @@ class SatpamDashboard extends StatelessWidget {
                         children: [
                           InkWell(
                             onTap: () {
+                              //Get.toNamed(Routes.TANYA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Parkir()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Parkir \nKendaraan",
+                              icon: "assets/icons/parking.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -156,8 +167,21 @@ class SatpamDashboard extends StatelessWidget {
                               );
                             },
                             child: ItemKategori(
-                              title: "Patroli",
+                              title: "Patroli\n",
                               icon: "assets/icons/patroli.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Kehadiran()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Presensi\n",
+                              icon: "assets/icons/presensi.png",
                             ),
                           ),
                           InkWell(
@@ -166,29 +190,14 @@ class SatpamDashboard extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => Working()),
+                                    builder: (context) => WorkingInstruction()),
                               );
                             },
                             child: ItemKategori(
-                              title: "Work Instruction",
-                              icon: "assets/icons/news.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              //Get.toNamed(Routes.TANYA)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => KendaraanLM()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Kendaraan",
+                              title: "Work \nInstruction",
                               icon: "assets/icons/delivery.png",
                             ),
                           ),
-
                           /*InkWell(
                             onTap: () {
                               // Get.toNamed(Routes.DATA)

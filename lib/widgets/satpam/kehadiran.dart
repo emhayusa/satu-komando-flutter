@@ -230,7 +230,7 @@ class _KehadiranState extends State<Kehadiran> {
                                   title: Text(
                                       'Tanggal: ${DateFormat('dd/MM/yyyy').format(data.tanggal)}'),
                                   subtitle: Text(
-                                      'Datang: ${DateFormat('hh:mm:ss a').format(data.waktuDatang.toLocal())} (${data.longDatang}, ${data.latDatang})\nPulang: ${data.waktuPulang == null ? "-" : DateFormat('hh:mm:ss a').format(data.waktuPulang!.toLocal()) + " (${data.longPulang}, ${data.latPulang})"} '),
+                                      'Jenis Presensi: ${data.jenisPresensi.name}\nDatang: ${DateFormat('hh:mm:ss a').format(data.waktuDatang.toLocal())} (${data.longDatang}, ${data.latDatang})\nPulang: ${data.waktuPulang == null ? "-" : DateFormat('hh:mm:ss a').format(data.waktuPulang!.toLocal()) + " (${data.longPulang}, ${data.latPulang})"} '),
                                   //trailing: Text(permission.date),
                                   onTap: () {
                                     /*

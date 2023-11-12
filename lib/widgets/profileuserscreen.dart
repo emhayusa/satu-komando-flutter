@@ -32,13 +32,8 @@ class _ProfileClientScreenState extends State<ProfileClientScreen> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String userId = prefs.getString('user_id') ?? '';
-      print(userId);
       final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
       if (response.statusCode == 200) {
-        print(response.body);
-        //print(json.decode(response.body));
-        //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
-
         //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
         final dynamic _response = json.decode(response.body);
         // Create a list of model objects

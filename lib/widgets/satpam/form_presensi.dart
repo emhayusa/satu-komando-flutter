@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:kjm_security/model/jenisPresensi.dart';
 import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
 import 'package:location/location.dart';
 import 'package:path/path.dart' as path;
@@ -22,8 +23,13 @@ class _FormPresensiState extends State<FormPresensi> {
   //String apiUrl = 'https://geoportal.big.go.id/api-dev/file/upload';
   String apiUrlDatang = 'https://satukomando.id/api-prod/presensi/datang';
   String apiUrlPulang = 'https://satukomando.id/api-prod/presensi/pulang';
+  String apiUrlView = 'https://satukomando.id/api-prod/jenis-presensi/';
 
   bool _isUploading = false;
+
+  String _selectedOption1 = "";
+
+  List<JenisPresensi> datas = [];
 
   Location _location = Location();
   late LocationData currentLocation;
@@ -31,13 +37,72 @@ class _FormPresensiState extends State<FormPresensi> {
 
   TextEditingController _longController = TextEditingController();
   TextEditingController _latController = TextEditingController();
+  TextEditingController _backupController = TextEditingController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    fetchData();
     _initializeLocation();
     //fetchPresensi();
+  }
+
+  Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+      //_uploadProgress = 0.0;
+      //_image = null;
+    });
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user = prefs.getString('user') ?? '';
+      var data = jsonDecode(user);
+      //print(data['pegawai']['lokasi']['uuid']);
+      // final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
+      var urlnya = apiUrlView;
+      //print(urlnya);
+      final response = await http.get(Uri.parse(urlnya),
+          headers: {"x-access-token": data['accessToken']});
+      if (response.statusCode == 200) {
+        print(response.body);
+        //print(json.decode(response.body));
+        //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
+
+        //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
+        //final List<dynamic> data = json.decode(response.body);
+        //print(data);
+        //data.map((json) => json);
+        // Create a list of model objects
+        //List<Laporan> dataList =
+        //    data.map((json) => Laporan.fromJson(json)).toList();
+
+        final List<dynamic> datanya = json.decode(response.body);
+
+        List<JenisPresensi> tamuList =
+            datanya.map((json) => JenisPresensi.fromJson(json)).toList();
+
+        // Create a list of model objects
+
+        print(tamuList.length);
+
+        //print(dataList.length);
+
+        setState(() {
+          datas = tamuList;
+          _selectedOption1 = tamuList[2].name;
+        });
+      } else {
+        print('Gagal mengambil data ');
+      }
+    } catch (e) {
+      print('Terjadi kesalahan saat mengambil data: $e');
+    }
+    setState(() {
+      isLoading = false;
+      //_uploadProgress = 0.0;
+      //_image = null;
+    });
   }
 
   @override
@@ -91,21 +156,39 @@ class _FormPresensiState extends State<FormPresensi> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse(widget.mode == "datang" ? apiUrlDatang : apiUrlPulang),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': data['accessToken']
-        },
-        body: '{"data":{"longitude":' +
+      print(_selectedOption1);
+      List<JenisPresensi> filtered = [];
+      filtered = datas
+          .where((data) =>
+              data.name.toLowerCase().contains(_selectedOption1.toLowerCase()))
+          .toList();
+      print(filtered[0].toJson());
+      if (_selectedOption1 != 'Backup') {
+        _backupController.text = "";
+      }
+      Map<String, dynamic> requestBody = {
+        'data': '{"longitude":' +
             _longController.text +
             ',"latitude":' +
             _latController.text +
+            ',"namaBackup":"' +
+            _backupController.text +
+            '","jenisPresensi":' +
+            jsonEncode(filtered[0].toJson()) +
             ',"user":' +
             jsonEncode(data['pegawai']['user']) +
-            '}}',
-      );
-
+            '}',
+        //'user_id': userId,
+        //'password': password,
+        //'new_password': newPassword,
+      };
+      final response = await http.post(
+          Uri.parse(widget.mode == "datang" ? apiUrlDatang : apiUrlPulang),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': data['accessToken']
+          },
+          body: jsonEncode(requestBody));
       //request.fields['guest_name'] = _namaController.text;
       //request.fields['come_to'] = _tujuanController.text;
       //request.fields['purpose'] = _keperluanController.text;
@@ -192,6 +275,7 @@ class _FormPresensiState extends State<FormPresensi> {
                 ),
                 TextFormField(
                   controller: _latController,
+                  readOnly: true,
                   decoration: InputDecoration(
                     labelText: 'Latitude',
                   ),
@@ -202,6 +286,42 @@ class _FormPresensiState extends State<FormPresensi> {
                     return null;
                   },
                 ),
+                SizedBox(height: 10),
+                mode == "Datang"
+                    ? DropdownButtonFormField<String>(
+                        value: _selectedOption1,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: "Jenis Presensi",
+                        ),
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedOption1 = val!;
+                          });
+                        },
+                        //(val) => _handleOption1Change,
+                        items: datas.map((JenisPresensi option) {
+                          return DropdownMenuItem<String>(
+                            value: option.name,
+                            child: Text(option.name),
+                          );
+                        }).toList(),
+                      )
+                    : SizedBox(),
+                _selectedOption1 == "Backup"
+                    ? TextFormField(
+                        controller: _backupController,
+                        decoration: InputDecoration(
+                          labelText: 'Nama Backup',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Masukkan Nama Backup';
+                          }
+                          return null;
+                        },
+                      )
+                    : SizedBox(),
                 SizedBox(height: 10),
                 Container(
                   width: double.infinity,

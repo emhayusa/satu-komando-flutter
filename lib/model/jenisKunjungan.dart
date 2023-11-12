@@ -1,15 +1,15 @@
-class WarehouseType {
-  int? id;
+class JenisKunjungan {
+  int id;
   String uuid;
   String name;
 
-  WarehouseType({
-    this.id,
+  JenisKunjungan({
+    required this.id,
     required this.uuid,
     required this.name,
   });
 
-  factory WarehouseType.fromJson(Map<String, dynamic> json) => WarehouseType(
+  factory JenisKunjungan.fromJson(Map<String, dynamic> json) => JenisKunjungan(
         id: json["id"],
         uuid: json["uuid"],
         name: json["name"],

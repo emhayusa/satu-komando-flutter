@@ -1,39 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:kjm_security/model/Reportan.dart';
-import 'package:kjm_security/widgets/satpam/detail_kejadian.dart';
-import 'package:kjm_security/widgets/satpam/form_kejadian.dart';
 import 'package:http/http.dart' as http;
-import 'package:kjm_security/widgets/satpam/form_kejadian_penanganan.dart';
+import 'package:intl/intl.dart';
+import 'package:kjm_security/model/cekTask.model.dart';
+import 'package:kjm_security/widgets/satpam/detail_cek_task.dart';
+import 'package:kjm_security/widgets/satpam/form_cek_task.dart';
+import 'package:kjm_security/widgets/satpam/form_task_karung.dart';
+import 'package:kjm_security/widgets/satpam/form_task_keluar.dart';
+import 'package:kjm_security/widgets/satpam/form_task_selesai.dart';
+
 import 'dart:convert';
 
 import 'package:kjm_security/widgets/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Kejadian extends StatefulWidget {
-  const Kejadian({super.key});
+class ListTask extends StatefulWidget {
+  const ListTask({super.key});
 
   @override
-  State<Kejadian> createState() => _KejadianState();
+  State<ListTask> createState() => _ListTaskState();
 }
 
-class _KejadianState extends State<Kejadian> {
+class _ListTaskState extends State<ListTask> {
   late DateTime selectedDate;
-
+  bool isLoading = false;
   TextEditingController searchController = TextEditingController();
-  List<Reportan> datas = [];
+  List<CekTaskModel> datas = [];
   //  Tamu('1', 'Joko', 'PT. Katulampa', 'Divisi Sales', 'Promosi barang',
   //      '2023-05-16 08:00:00', '2023-05-16 08:23:00'),
   //  Tamu('2', 'Budi', 'Perorangan', 'Divisi HRD', 'Melamar pekerjaan',
   //     '2023-05-16 09:00:00', '-'),
   //];
-  bool isLoading = false;
 
-  List<Reportan> filteredDatas = [];
+  List<CekTaskModel> filteredDatas = [];
 
-  String apiUrl = 'https://satukomando.id/api-prod/report/';
-  String apiView = 'https://satukomando.id/api-prod/report/photo/';
-  //https://satukomando.id/api-prod/report-type
+  //String apiUrl = 'https://geoportal.big.go.id/api-dev/check-points/kantor/';
+  String apiUrl = 'https://satukomando.id/api-prod/cek-task/';
+  String apiView = 'https://satukomando.id/api-prod/cek-task/photoBox/';
+
   @override
   void initState() {
     super.initState();
@@ -64,23 +67,16 @@ class _KejadianState extends State<Kejadian> {
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
         //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
-        //final List<dynamic> data = json.decode(response.body);
-        //print(data);
-        //data.map((json) => json);
+        final List<dynamic> data = json.decode(response.body);
         // Create a list of model objects
-        //List<Laporan> dataList =
-        //    data.map((json) => Laporan.fromJson(json)).toList();
+        List<CekTaskModel> tamuList =
+            data.map((json) => CekTaskModel.fromJson(json)).toList();
 
-        final List<dynamic> datanya = json.decode(response.body);
-
-        List<Reportan> tamuList =
-            datanya.map((json) => Reportan.fromJson(json)).toList();
-
-        // Create a list of model objects
+        //print(response.body);
+        //print(json.decode(response.body));
+        //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
         print(tamuList.length);
-
-        //print(dataList.length);
 
         setState(() {
           datas = tamuList;
@@ -106,73 +102,23 @@ class _KejadianState extends State<Kejadian> {
               //permission.date
               //    .toLowerCase()
               //    .contains(searchTerm.toLowerCase()) ||
-              data.createdAt
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchTerm.toLowerCase()))
+              data.noSurat.toLowerCase().contains(searchTerm.toLowerCase()))
           .toList();
     });
   }
 
-/*
-  void openTamuForm(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Pencatatan Buku Tamu'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Nama'),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Asal'),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Tujuan'),
-              ),
-              TextFormField(
-                //controller: dateController,
-                decoration: InputDecoration(labelText: 'Keperluan'),
-                // readOnly: true,
-                //onTap: () => _selectDate(context),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Batal'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Handle form submission here
-              },
-              child: Text('Simpan'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _handleDialogResult() {
-    //fetchTamu();
-    print("dipanggil");
-  }
-  */
-
-  void navigateToForm() async {
+  void navigateToFormKendaraan() async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => FormKejadian()),
+      MaterialPageRoute(builder: (context) => FormCekTask()),
     );
+    fetchData(); // Refresh the items when returning from the second widget
+  }
+
+  void handleRefresh() async {
+    setState(() {
+      datas = [];
+    });
     fetchData(); // Refresh the items when returning from the second widget
   }
 
@@ -180,7 +126,7 @@ class _KejadianState extends State<Kejadian> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LAPORAN'),
+        title: const Text('Cek Jumlah Task'),
         centerTitle: true,
       ),
       body: RefreshIndicator(
@@ -193,7 +139,7 @@ class _KejadianState extends State<Kejadian> {
                 controller: searchController,
                 onChanged: filterTamus,
                 decoration: InputDecoration(
-                  labelText: 'Cari',
+                  labelText: 'Cari No Surat',
                   prefixIcon: Icon(Icons.search),
                 ),
               ),
@@ -214,7 +160,12 @@ class _KejadianState extends State<Kejadian> {
                       : ListView.builder(
                           itemCount: filteredDatas.length,
                           itemBuilder: (BuildContext context, int index) {
-                            Reportan data = filteredDatas[index];
+                            CekTaskModel data = filteredDatas[index];
+                            //print(data.waktuDatang);
+                            //print(DateFormat("yyyy-MM-ddTHH:mm:ssZ")
+                            //    .parseUTC(tamu.waktuDatang.toIso8601String()));
+                            //print(DateFormat('dd MMM yyyy hh:mm:ss a')
+                            //    .format(tamu.waktuDatang.toLocal()));
                             return Card(
                               margin: EdgeInsets.all(4.0),
                               child: Padding(
@@ -222,26 +173,22 @@ class _KejadianState extends State<Kejadian> {
                                 child: ListTile(
                                   leading: buildImageFromUrl(
                                       '$apiView/${data.uuid}', 50.0),
-                                  title:
-                                      Text('Category: ${data.reportType.name}'),
+                                  title: Text('No Surat: ${data.noSurat}'),
                                   subtitle: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                          'Description:\n${data.description}\nWaktu kejadian:\n${DateFormat('dd MMM yyyy, hh:mm:ss a').format(data.createdAt.toLocal())}'),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      data.penanganan == ""
+                                          'Waktu Box: ${DateFormat('dd MMM yyyy, hh:mm:ss a').format(data.waktuBox.toLocal())}\nNo Polisi: ${data.noPolisi}'),
+                                      data.waktuKarung == null
                                           ? ElevatedButton(
                                               onPressed: () {
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                       builder: (context) =>
-                                                          FormKejadianPenanganan(
-                                                              reportan: data,
+                                                          FormTaskKarung(
+                                                              task: data,
                                                               refreshListCallback:
                                                                   fetchData)),
                                                 );
@@ -253,9 +200,55 @@ class _KejadianState extends State<Kejadian> {
                                                       BorderRadius.circular(8),
                                                 ),
                                               ),
-                                              child: Text('Update Penanganan'),
+                                              child: Text('Foto Karung'),
                                             )
-                                          : SizedBox()
+                                          : SizedBox(),
+                                      data.waktuSelesai == null
+                                          ? ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          FormTaskSelesai(
+                                                              task: data,
+                                                              refreshListCallback:
+                                                                  fetchData)),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                //backgroundColor: AppColors.secondaryColor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Text('Foto Selesai'),
+                                            )
+                                          : SizedBox(),
+                                      data.waktuKeluar == null
+                                          ? ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          FormTaskKeluar(
+                                                              task: data,
+                                                              refreshListCallback:
+                                                                  handleRefresh)),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                //backgroundColor: AppColors.secondaryColor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Text('Foto Keluar'),
+                                            )
+                                          : SizedBox(),
                                     ],
                                   ),
                                   //trailing: Text(permission.date),
@@ -263,9 +256,9 @@ class _KejadianState extends State<Kejadian> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => DetailKejadian(
-                                              reportan: data,
-                                              refreshListCallback: fetchData)),
+                                          builder: (context) => DetailCekTask(
+                                                task: data,
+                                              )),
                                     );
                                   },
                                 ),
@@ -278,7 +271,7 @@ class _KejadianState extends State<Kejadian> {
               width: double.infinity,
               margin: EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: navigateToForm,
+                onPressed: navigateToFormKendaraan,
                 style: ElevatedButton.styleFrom(
                   //backgroundColor: AppColors.secondaryColor,
                   shape: RoundedRectangleBorder(
@@ -286,7 +279,7 @@ class _KejadianState extends State<Kejadian> {
                   ),
                   padding: const EdgeInsets.all(20),
                 ),
-                child: Text('Input Laporan Kejadian'),
+                child: Text('Laporkan Jumlah Task Order'),
               ),
             ),
           ],

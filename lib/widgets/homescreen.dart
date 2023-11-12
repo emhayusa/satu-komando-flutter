@@ -66,21 +66,21 @@ class _HomePageState extends State<HomePage> {
   static const List<Widget> _widgetOptions = <Widget>[
     SatpamDashboard(),
     //ProfileScreen(),
-    //PasswordScreen(),
+    PasswordScreen(),
     PasswordScreen(),
   ];
   Color get_background(selectedIndex) {
     if (selectedIndex == 0) {
       return Colors.blue.shade300;
     } else if (selectedIndex == 1) {
-      return Colors.deepOrange.shade300;
-    } else {
       return Colors.teal.shade300;
+    } else {
+      return Colors.deepOrange.shade300;
     }
   }
 
   void _onItemTapped(int index) async {
-    if (index == 1) {
+    if (index == 2) {
       logout(context);
     } else {
       setState(() {
@@ -112,13 +112,13 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.account_circle, color: Colors.black, size: 30),
             label: 'Profile',
           ),
+          */
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.key, color: Colors.white, size: 35),
             icon: Icon(Icons.key, color: Colors.black, size: 30),
             label: 'Password',
             // backgroundColor: Colors.purple,
           ),
-          */
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.logout, color: Colors.white, size: 35),
             icon: Icon(Icons.logout, color: Colors.black, size: 30),

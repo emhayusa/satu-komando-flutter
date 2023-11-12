@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:kjm_security/widgets/clock.dart';
 import 'package:kjm_security/widgets/item_kategori.dart';
 import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
-import 'package:kjm_security/widgets/satpam/ijin.dart';
-import 'package:kjm_security/widgets/satpam/kehadiran.dart';
 import 'package:kjm_security/widgets/satpam/kejadian.dart';
 import 'package:kjm_security/widgets/satpam/paket.dart';
-import 'package:kjm_security/widgets/satpam/patroli.dart';
-import 'package:kjm_security/widgets/satpam/presensi.dart';
 import 'package:kjm_security/widgets/satpam/sos.dart';
-import 'package:kjm_security/widgets/supervisor/pesan.dart';
 import 'package:kjm_security/widgets/top_background.dart';
 
 class ClientDashboard extends StatelessWidget {

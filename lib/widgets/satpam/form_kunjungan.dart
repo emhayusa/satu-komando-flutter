@@ -4,26 +4,30 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:kjm_security/model/reportType.dart';
+import 'package:kjm_security/model/jenisKunjungan.dart';
+import 'package:kjm_security/model/jenisSatuan.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FormKejadian extends StatefulWidget {
-  const FormKejadian({super.key});
+class FormKunjungan extends StatefulWidget {
+  const FormKunjungan({super.key});
 
   @override
-  State<FormKejadian> createState() => _FormKejadianState();
+  State<FormKunjungan> createState() => _FormKunjunganState();
 }
 
-class _FormKejadianState extends State<FormKejadian> {
+class _FormKunjunganState extends State<FormKunjungan> {
   final _formKey = GlobalKey<FormState>();
   XFile? _image;
   bool _isUploading = false;
   bool isLoading = false;
 
   String _selectedOption1 = "";
+  String _selectedOption2 = "";
 
-  List<ReportType> datas = [];
+  List<JenisKunjungan> datas = [];
+  List<JenisSatuan> datas2 = [];
+
   //List<String> _options1 = [
   //  'Kebakaran',
   //  'Perkelahian',
@@ -32,10 +36,11 @@ class _FormKejadianState extends State<FormKejadian> {
   //];
   final ImagePicker _picker = ImagePicker();
   TextEditingController _situasiController = TextEditingController();
-  TextEditingController _penangananController = TextEditingController();
+  TextEditingController _hasilController = TextEditingController();
 
-  String apiUrl = 'https://satukomando.id/api-prod/report/';
-  String apiUrlView = 'https://satukomando.id/api-prod/report-type/';
+  String apiUrl = 'https://satukomando.id/api-prod/kunjungan/';
+  String apiUrlView = 'https://satukomando.id/api-prod/jenis-kunjungan/';
+  String apiUrlView2 = 'https://satukomando.id/api-prod/unit-satuan/';
 
   @override
   void initState() {
@@ -76,8 +81,8 @@ class _FormKejadianState extends State<FormKejadian> {
 
         final List<dynamic> datanya = json.decode(response.body);
 
-        List<ReportType> tamuList =
-            datanya.map((json) => ReportType.fromJson(json)).toList();
+        List<JenisKunjungan> tamuList =
+            datanya.map((json) => JenisKunjungan.fromJson(json)).toList();
 
         // Create a list of model objects
 
@@ -88,6 +93,40 @@ class _FormKejadianState extends State<FormKejadian> {
         setState(() {
           datas = tamuList;
           _selectedOption1 = tamuList[0].name;
+        });
+      } else {
+        print('Gagal mengambil data ');
+      }
+
+      final response2 = await http.get(Uri.parse(apiUrlView2),
+          headers: {"x-access-token": data['accessToken']});
+      if (response2.statusCode == 200) {
+        print(response2.body);
+        //print(json.decode(response.body));
+        //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
+
+        //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
+        //final List<dynamic> data = json.decode(response.body);
+        //print(data);
+        //data.map((json) => json);
+        // Create a list of model objects
+        //List<Laporan> dataList =
+        //    data.map((json) => Laporan.fromJson(json)).toList();
+
+        final List<dynamic> datanya = json.decode(response2.body);
+
+        List<JenisSatuan> tamuList =
+            datanya.map((json) => JenisSatuan.fromJson(json)).toList();
+
+        // Create a list of model objects
+
+        print(tamuList.length);
+
+        //print(dataList.length);
+
+        setState(() {
+          datas2 = tamuList;
+          _selectedOption2 = tamuList[0].name;
         });
       } else {
         print('Gagal mengambil data ');
@@ -147,19 +186,34 @@ class _FormKejadianState extends State<FormKejadian> {
         );
 
         print(_selectedOption1);
-        List<ReportType> filtered = [];
+        List<JenisKunjungan> filtered = [];
         filtered = datas
             .where((data) => data.name
                 .toLowerCase()
                 .contains(_selectedOption1.toLowerCase()))
             .toList();
         print(filtered[0].toJson());
+
+        List<JenisSatuan> filtered2 = [];
+        filtered2 = datas2
+            .where((data) => data.name
+                .toLowerCase()
+                .contains(_selectedOption2.toLowerCase()))
+            .toList();
+        print(filtered2[0].toJson());
+        //{"description":"test web","hasil":"test hasil we
+        //"user":{"uuid":"b9d1a4b6-c503-4459-ab20-c2d45ee5acd7","username":"satpam1","email":"satpam1@gmail.com"},
+        //"lokasi":{"uuid":"97fc5e20-d8c9-4ad2-8c92-f7d17f88a220","lokasiName":"Gudang 1"},
+        //"jenisKunjungan":{"id":2,"uuid":"4299c779-4da0-482a-89ac-3ef3aad1d7d3","name":"Penanganan"},
+        //"jenisSatuan":{"id":2,"uuid":"f009389d-5590-4cff-ba7b-70b5d9c9eaba","name":"PIC Sipil"}}
         request.fields['data'] = '{"description":"' +
             _situasiController.text +
-            '","penanganan":"' +
-            _penangananController.text +
-            '","reportType":' +
+            '", "hasil":"' +
+            _hasilController.text +
+            '","jenisKunjungan":' +
             jsonEncode(filtered[0].toJson()) +
+            ',"jenisSatuan":' +
+            jsonEncode(filtered2[0].toJson()) +
             ',"user":' +
             jsonEncode(data['pegawai']['user']) +
             ',"lokasi":' +
@@ -204,6 +258,7 @@ class _FormKejadianState extends State<FormKejadian> {
             } else {
               // Handle API error response
               print(response.reasonPhrase);
+              print(response.statusCode);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Data gagal dikirim'),
@@ -262,7 +317,7 @@ class _FormKejadianState extends State<FormKejadian> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Isian Kejadian'),
+        title: const Text('Form Isian Kunjungan'),
         centerTitle: true,
       ),
       body: Padding(
@@ -304,7 +359,7 @@ class _FormKejadianState extends State<FormKejadian> {
                   value: _selectedOption1,
                   isExpanded: true,
                   decoration: InputDecoration(
-                    labelText: "Kategori",
+                    labelText: "Jenis Kunjungan",
                   ),
                   onChanged: (val) {
                     setState(() {
@@ -312,7 +367,26 @@ class _FormKejadianState extends State<FormKejadian> {
                     });
                   },
                   //(val) => _handleOption1Change,
-                  items: datas.map((ReportType option) {
+                  items: datas.map((JenisKunjungan option) {
+                    return DropdownMenuItem<String>(
+                      value: option.name,
+                      child: Text(option.name),
+                    );
+                  }).toList(),
+                ),
+                DropdownButtonFormField<String>(
+                  value: _selectedOption2,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: "Jenis Satuan",
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      _selectedOption2 = val!;
+                    });
+                  },
+                  //(val) => _handleOption1Change,
+                  items: datas2.map((JenisSatuan option) {
                     return DropdownMenuItem<String>(
                       value: option.name,
                       child: Text(option.name),
@@ -323,22 +397,28 @@ class _FormKejadianState extends State<FormKejadian> {
                   controller: _situasiController,
                   //maxLines: 4,
                   decoration: InputDecoration(
-                    labelText: 'Deskripsi Situasi',
+                    labelText: 'Deskripsi',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Deskripsi Situasi';
+                      return 'Masukkan Deskripsi';
                     }
                     return null;
                   },
                 ),
                 SizedBox(height: 10),
                 TextFormField(
-                  controller: _penangananController,
+                  controller: _hasilController,
                   //maxLines: 4,
                   decoration: InputDecoration(
-                    labelText: 'Penanganan',
+                    labelText: 'Hasil',
                   ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Masukkan Hasil';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(height: 10),
                 Container(

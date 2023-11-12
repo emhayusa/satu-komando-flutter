@@ -1,37 +1,105 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:kjm_security/model/paket.dart';
-import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
+import 'package:kjm_security/model/warehouseType.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FormPaketAmbil extends StatefulWidget {
-  final Paketan paketan;
-
-  final Function refreshListCallback;
-  const FormPaketAmbil(
-      {super.key, required this.paketan, required this.refreshListCallback});
+class FormCekTask extends StatefulWidget {
+  const FormCekTask({super.key});
 
   @override
-  State<FormPaketAmbil> createState() => _FormPaketAmbilState();
+  State<FormCekTask> createState() => _FormCekTaskState();
 }
 
-class _FormPaketAmbilState extends State<FormPaketAmbil> {
+class _FormCekTaskState extends State<FormCekTask> {
   final _formKey = GlobalKey<FormState>();
   XFile? _image;
-  final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
+  bool isLoading = false;
 
-  String apiUrl = 'https://satukomando.id/api-prod/paket/ambil';
+  String _selectedOption1 = "";
 
-  TextEditingController _namaController = TextEditingController();
-  TextEditingController _alamatController = TextEditingController();
-  TextEditingController _hpController = TextEditingController();
+  List<WarehouseType> datas = [];
+  //List<String> _options1 = [
+  //  'Kebakaran',
+  //  'Perkelahian',
+  //  'Pencurian',
+  //  'Kerusakan',
+  //];
+  final ImagePicker _picker = ImagePicker();
+  TextEditingController _noPolisiController = TextEditingController();
+  TextEditingController _noSuratController = TextEditingController();
+  String apiUrl = 'https://satukomando.id/api-prod/cek-task/';
+  String apiUrlView = 'https://satukomando.id/api-prod/warehouse-type/';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+    // Initialize selectedDate with current date
+    // filteredTamus = tamus;
+  }
+
+  Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+      //_uploadProgress = 0.0;
+      //_image = null;
+    });
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String user = prefs.getString('user') ?? '';
+      var data = jsonDecode(user);
+      //print(data['pegawai']['lokasi']['uuid']);
+      // final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
+      var urlnya = apiUrlView;
+      //print(urlnya);
+      final response = await http.get(Uri.parse(urlnya),
+          headers: {"x-access-token": data['accessToken']});
+      if (response.statusCode == 200) {
+        print(response.body);
+        //print(json.decode(response.body));
+        //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
+
+        //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
+        //final List<dynamic> data = json.decode(response.body);
+        //print(data);
+        //data.map((json) => json);
+        // Create a list of model objects
+        //List<Laporan> dataList =
+        //    data.map((json) => Laporan.fromJson(json)).toList();
+
+        final List<dynamic> datanya = json.decode(response.body);
+
+        List<WarehouseType> tamuList =
+            datanya.map((json) => WarehouseType.fromJson(json)).toList();
+
+        // Create a list of model objects
+
+        print(tamuList.length);
+
+        //print(dataList.length);
+
+        setState(() {
+          datas = tamuList;
+          _selectedOption1 = tamuList[0].name;
+        });
+      } else {
+        print('Gagal mengambil data ');
+      }
+    } catch (e) {
+      print('Terjadi kesalahan saat mengambil data: $e');
+    }
+    setState(() {
+      isLoading = false;
+      //_uploadProgress = 0.0;
+      //_image = null;
+    });
+  }
 
   @override
   void dispose() {
@@ -39,8 +107,21 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
     super.dispose();
   }
 
+  Future<void> _openCamera(BuildContext context) async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+
+    if (image != null) {
+      setState(() {
+        _image = image;
+      });
+      //File imageFile = File(image.path);
+      //_uploadImage(imageFile, context);
+    }
+  }
+
   Future<void> _uploadData() async {
     //String apiUrl = 'https://geoportal.big.go.id/api-dev/file/upload';
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String user = prefs.getString('user') ?? '';
     var data = jsonDecode(user);
@@ -52,8 +133,7 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
 
     try {
       if (_image != null) {
-        final request = http.MultipartRequest(
-            'PUT', Uri.parse(apiUrl + "/" + widget.paketan.uuid));
+        final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
 
         final stream = http.ByteStream(_image!.openRead());
         final length = await _image!.length();
@@ -65,19 +145,36 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
           filename: path.basename(_image!.path),
         );
 
-        /*request.fields['recipient'] = _namaController.text;
-        request.fields['address'] = _alamatController.text;
-        request.fields['hp'] = _hpController.text;
-        request.fields['user_id'] = userId;
-        */
-        request.fields['user'] = jsonEncode(data['pegawai']['user']);
-        print(apiUrl + "/" + widget.paketan.uuid);
+        print(_selectedOption1);
+        List<WarehouseType> filtered = [];
+        filtered = datas
+            .where((data) => data.name
+                .toLowerCase()
+                .contains(_selectedOption1.toLowerCase()))
+            .toList();
+        print(filtered[0].toJson());
+        request.fields['data'] = '{"noSurat":"' +
+            _noSuratController.text +
+            '","noPolisi":"' +
+            _noPolisiController.text +
+            '","warehouseType":' +
+            jsonEncode(filtered[0].toJson()) +
+            ',"user":' +
+            jsonEncode(data['pegawai']['user']) +
+            ',"lokasi":' +
+            jsonEncode(data['pegawai']['lokasi']) +
+            '}';
         print(jsonEncode(data['pegawai']['user']));
+        //request.fields['guest_name'] = _namaController.text;
+        //request.fields['come_to'] = _tujuanController.text;
+        //request.fields['purpose'] = _keperluanController.text;
+
         request.files.add(multipartFile);
         request.headers.addAll({'x-access-token': data['accessToken']});
         final response = await request.send();
 
         final totalBytes = response.contentLength;
+        print("total bytes");
         print(totalBytes);
         await response.stream.listen(
           (List<int> event) {
@@ -87,6 +184,8 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
           },
           onDone: () {
             //print(response.statusCode);
+            //print(response.request);
+
             if (response.statusCode == 200) {
               // Upload completed successfully
               //Navigator.pop(context);
@@ -101,7 +200,6 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
                 ),
               );
               Navigator.pop(context);
-              widget.refreshListCallback();
             } else {
               // Handle API error response
               print(response.reasonPhrase);
@@ -124,6 +222,7 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
           },
           onError: (error) {
             // Handle upload error
+            // print(error);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Terjadi Error..'),
@@ -143,7 +242,7 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
       }
     } catch (e) {
       // Menangani kesalahan yang terjadi saat mengunggah gambar
-      print(e);
+      //print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Oops.. Error terjadi..'),
@@ -153,33 +252,16 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
           backgroundColor: Colors.red,
         ),
       );
-      setState(() {
-        _isUploading = false;
-        //_uploadProgress = 0.0;
-        //_image = null;
-      });
     }
 
     //Navigator.of(context).pop();
-  }
-
-  Future<void> _openCamera(BuildContext context) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-
-    if (image != null) {
-      setState(() {
-        _image = image;
-      });
-      //File imageFile = File(image.path);
-      //_uploadImage(imageFile, context);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Isian Ambil Paket'),
+        title: const Text('Form Isian Cek Task'),
         centerTitle: true,
       ),
       body: Padding(
@@ -190,64 +272,6 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                /* FutureBuilder<void>(
-                  future: retrieveLostData(),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<void> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                      case ConnectionState.waiting:
-                        return const Text(
-                          'You have not yet picked an image.',
-                          textAlign: TextAlign.center,
-                        );
-                      case ConnectionState.done:
-                        return const Text(
-                          'Done.',
-                          textAlign: TextAlign.center,
-                        );
-                      case ConnectionState.active:
-                        if (snapshot.hasError) {
-                          return Text(
-                            'Pick image/video error: ${snapshot.error}}',
-                            textAlign: TextAlign.center,
-                          );
-                        } else {
-                          return const Text(
-                            'You have not yet picked an image.',
-                            textAlign: TextAlign.center,
-                          );
-                        }
-                    }
-                  },
-                ),*/
-                /*_image != null
-                    ? Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: _image != null
-                              ? DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: FileImage(File(_image!.path)),
-                                )
-                              : null,
-                        ),
-                      )
-                    : const CircleAvatar(
-                        radius: 100,
-                        backgroundColor: Color.fromARGB(255, 164, 222, 249),
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 50,
-                        )),
-                SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _getImageFromCamera,
-                  child: Text('Ambil Photo'),
-                ),
-                */
                 _image != null
                     ? Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -273,55 +297,55 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
                     ),
                     padding: const EdgeInsets.all(20),
                   ),
-                  child: Text('Ambil Photo'),
+                  child: Text('Ambil Photo Box'),
+                ),
+                DropdownButtonFormField<String>(
+                  value: _selectedOption1,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: "Kategori",
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      _selectedOption1 = val!;
+                    });
+                  },
+                  //(val) => _handleOption1Change,
+                  items: datas.map((WarehouseType option) {
+                    return DropdownMenuItem<String>(
+                      value: option.name,
+                      child: Text(option.name),
+                    );
+                  }).toList(),
                 ),
                 TextFormField(
-                  //controller: _namaController,
-                  initialValue: widget.paketan.namaPenerima,
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Nama',
+                  controller: _noPolisiController,
+                  //maxLines: 4,
+                  decoration: InputDecoration(
+                    labelText: 'No Polisi',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Nama';
+                      return 'Masukkan No Polisi';
                     }
                     return null;
                   },
                 ),
+                SizedBox(height: 10),
                 TextFormField(
-                  //controller: _alamatController,
-                  initialValue: widget.paketan.alamat,
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Alamat',
+                  controller: _noSuratController,
+                  //maxLines: 4,
+                  decoration: InputDecoration(
+                    labelText: 'No Surat',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Alamat';
+                      return 'Masukkan No Surat';
                     }
                     return null;
                   },
                 ),
-                TextFormField(
-                  //controller: _hpController,
-                  initialValue: widget.paketan.hp,
-                  readOnly: true,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                  ],
-                  decoration: const InputDecoration(
-                    labelText: 'Hp',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Masukkan Hp';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.all(8.0),
@@ -348,6 +372,27 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
           ),
         ),
       ),
+      /*actions: [
+        ElevatedButton(
+          onPressed: _isUploading
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                },
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _isUploading
+              ? null
+              : () {
+                  if (_formKey.currentState!.validate()) {
+                    _uploadData();
+                  }
+                },
+          child: Text(_isUploading ? 'Processing..' : 'Submit'),
+        ),
+      ],*/
+      // Validasi berhasil
     );
   }
 }

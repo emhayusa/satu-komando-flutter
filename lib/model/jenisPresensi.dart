@@ -1,23 +1,23 @@
-class Reporter {
+class JenisPresensi {
   int? id;
   String? uuid;
-  String username;
+  String name;
 
-  Reporter({
+  JenisPresensi({
     this.id,
     this.uuid,
-    required this.username,
+    required this.name,
   });
 
-  factory Reporter.fromJson(Map<String, dynamic> json) => Reporter(
+  factory JenisPresensi.fromJson(Map<String, dynamic> json) => JenisPresensi(
         id: json["id"],
         uuid: json["uuid"],
-        username: json["username"],
+        name: json["name"],
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
         "uuid": uuid,
-        "username": username,
+        "name": name,
       };
 }

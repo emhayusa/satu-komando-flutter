@@ -5,33 +5,33 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:kjm_security/model/cekSampah.model.dart';
+import 'package:kjm_security/model/kendaraan.model.dart';
 import 'package:kjm_security/model/paket.dart';
 import 'package:kjm_security/widgets/satpam/buku_tamu.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FormPaketAmbil extends StatefulWidget {
-  final Paketan paketan;
+class FormSampahPaket extends StatefulWidget {
+  final CekSampahModel sampah;
 
   final Function refreshListCallback;
-  const FormPaketAmbil(
-      {super.key, required this.paketan, required this.refreshListCallback});
+  const FormSampahPaket(
+      {super.key, required this.sampah, required this.refreshListCallback});
 
   @override
-  State<FormPaketAmbil> createState() => _FormPaketAmbilState();
+  State<FormSampahPaket> createState() => _FormSampahPaketState();
 }
 
-class _FormPaketAmbilState extends State<FormPaketAmbil> {
+class _FormSampahPaketState extends State<FormSampahPaket> {
   final _formKey = GlobalKey<FormState>();
   XFile? _image;
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
 
-  String apiUrl = 'https://satukomando.id/api-prod/paket/ambil';
+  String apiUrl = 'https://satukomando.id/api-prod/cek-sampah/paket';
 
-  TextEditingController _namaController = TextEditingController();
-  TextEditingController _alamatController = TextEditingController();
-  TextEditingController _hpController = TextEditingController();
+  TextEditingController _noSealInController = TextEditingController();
 
   @override
   void dispose() {
@@ -53,7 +53,7 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
     try {
       if (_image != null) {
         final request = http.MultipartRequest(
-            'PUT', Uri.parse(apiUrl + "/" + widget.paketan.uuid));
+            'PUT', Uri.parse(apiUrl + "/" + widget.sampah.uuid));
 
         final stream = http.ByteStream(_image!.openRead());
         final length = await _image!.length();
@@ -70,9 +70,15 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
         request.fields['hp'] = _hpController.text;
         request.fields['user_id'] = userId;
         */
-        request.fields['user'] = jsonEncode(data['pegawai']['user']);
-        print(apiUrl + "/" + widget.paketan.uuid);
-        print(jsonEncode(data['pegawai']['user']));
+        //request.fields['user'] = jsonEncode(data['pegawai']['user']);
+        //print(apiUrl + "/" + widget.paketan.uuid);
+        //print(jsonEncode(data['pegawai']['user']));
+        request.fields['data'] = '{"description":"' +
+            _noSealInController.text +
+            '","user":' +
+            jsonEncode(data['pegawai']['user']) +
+            '}';
+
         request.files.add(multipartFile);
         request.headers.addAll({'x-access-token': data['accessToken']});
         final response = await request.send();
@@ -179,7 +185,7 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Isian Ambil Paket'),
+        title: const Text('Form Isian Temu Paket'),
         centerTitle: true,
       ),
       body: Padding(
@@ -273,50 +279,16 @@ class _FormPaketAmbilState extends State<FormPaketAmbil> {
                     ),
                     padding: const EdgeInsets.all(20),
                   ),
-                  child: Text('Ambil Photo'),
+                  child: Text('Ambil Photo Paket'),
                 ),
                 TextFormField(
-                  //controller: _namaController,
-                  initialValue: widget.paketan.namaPenerima,
-                  readOnly: true,
+                  controller: _noSealInController,
                   decoration: const InputDecoration(
-                    labelText: 'Nama',
+                    labelText: 'Description',
                   ),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Masukkan Nama';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  //controller: _alamatController,
-                  initialValue: widget.paketan.alamat,
-                  readOnly: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Alamat',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Masukkan Alamat';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  //controller: _hpController,
-                  initialValue: widget.paketan.hp,
-                  readOnly: true,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                  ],
-                  decoration: const InputDecoration(
-                    labelText: 'Hp',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Masukkan Hp';
+                      return 'Masukkan Description';
                     }
                     return null;
                   },

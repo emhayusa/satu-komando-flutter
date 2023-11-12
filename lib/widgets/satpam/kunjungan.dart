@@ -1,37 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:kjm_security/model/patroli.dart';
-import 'package:kjm_security/widgets/satpam/form_sampah.dart';
+import 'package:kjm_security/model/kunjungan.dart';
+import 'package:http/http.dart' as http;
+import 'package:kjm_security/widgets/satpam/detail_kunjungan.dart';
+import 'package:kjm_security/widgets/satpam/form_kunjungan.dart';
 import 'dart:convert';
 
 import 'package:kjm_security/widgets/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Sampah extends StatefulWidget {
-  const Sampah({super.key});
+class Kunjungan extends StatefulWidget {
+  const Kunjungan({super.key});
 
   @override
-  State<Sampah> createState() => _SampahState();
+  State<Kunjungan> createState() => _KunjunganState();
 }
 
-class _SampahState extends State<Sampah> {
+class _KunjunganState extends State<Kunjungan> {
   late DateTime selectedDate;
-  bool isLoading = false;
+
   TextEditingController searchController = TextEditingController();
-  List<Patrolian> datas = [];
+  List<KunjunganModel> datas = [];
   //  Tamu('1', 'Joko', 'PT. Katulampa', 'Divisi Sales', 'Promosi barang',
   //      '2023-05-16 08:00:00', '2023-05-16 08:23:00'),
   //  Tamu('2', 'Budi', 'Perorangan', 'Divisi HRD', 'Melamar pekerjaan',
   //     '2023-05-16 09:00:00', '-'),
   //];
+  bool isLoading = false;
 
-  List<Patrolian> filteredDatas = [];
+  List<KunjunganModel> filteredDatas = [];
 
-  //String apiUrl = 'https://geoportal.big.go.id/api-dev/check-points/kantor/';
-  String apiUrl = 'https://satukomando.id/api-prod/working/sampah/';
-  String apiView = 'https://satukomando.id/api-prod/working/photo/';
-
+  String apiUrl = 'https://satukomando.id/api-prod/kunjungan/';
+  String apiView = 'https://satukomando.id/api-prod/kunjungan/photo/';
+  //https://satukomando.id/api-prod/report-type
   @override
   void initState() {
     super.initState();
@@ -53,7 +54,7 @@ class _SampahState extends State<Sampah> {
       //print(data['pegawai']['lokasi']['uuid']);
       // final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
       var urlnya = apiUrl + "lokasi/" + data['pegawai']['lokasi']['uuid'];
-      //print(urlnya);
+      print(urlnya);
       final response = await http.get(Uri.parse(urlnya),
           headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
@@ -62,16 +63,23 @@ class _SampahState extends State<Sampah> {
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
         //return parsed.map<Photo>((json) => Photo.fromJson(json)).toList();
-        final List<dynamic> data = json.decode(response.body);
+        //final List<dynamic> data = json.decode(response.body);
+        //print(data);
+        //data.map((json) => json);
         // Create a list of model objects
-        List<Patrolian> tamuList =
-            data.map((json) => Patrolian.fromJson(json)).toList();
+        //List<Laporan> dataList =
+        //    data.map((json) => Laporan.fromJson(json)).toList();
 
-        //print(response.body);
-        //print(json.decode(response.body));
-        //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
+        final List<dynamic> datanya = json.decode(response.body);
+
+        List<KunjunganModel> tamuList =
+            datanya.map((json) => KunjunganModel.fromJson(json)).toList();
+
+        // Create a list of model objects
 
         print(tamuList.length);
+
+        //print(dataList.length);
 
         setState(() {
           datas = tamuList;
@@ -97,15 +105,72 @@ class _SampahState extends State<Sampah> {
               //permission.date
               //    .toLowerCase()
               //    .contains(searchTerm.toLowerCase()) ||
-              data.description.toLowerCase().contains(searchTerm.toLowerCase()))
+              data.createdAt
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchTerm.toLowerCase()))
           .toList();
     });
   }
 
-  void navigateToFormSampah() async {
+/*
+  void openTamuForm(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Pencatatan Buku Tamu'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Nama'),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Asal'),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Tujuan'),
+              ),
+              TextFormField(
+                //controller: dateController,
+                decoration: InputDecoration(labelText: 'Keperluan'),
+                // readOnly: true,
+                //onTap: () => _selectDate(context),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Handle form submission here
+              },
+              child: Text('Simpan'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleDialogResult() {
+    //fetchTamu();
+    print("dipanggil");
+  }
+  */
+
+  void navigateToForm() async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const FormSampah()),
+      MaterialPageRoute(builder: (context) => FormKunjungan()),
     );
     fetchData(); // Refresh the items when returning from the second widget
   }
@@ -114,7 +179,7 @@ class _SampahState extends State<Sampah> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pengecekan Sampah'),
+        title: const Text('KUNJUNGAN'),
         centerTitle: true,
       ),
       body: RefreshIndicator(
@@ -148,12 +213,7 @@ class _SampahState extends State<Sampah> {
                       : ListView.builder(
                           itemCount: filteredDatas.length,
                           itemBuilder: (BuildContext context, int index) {
-                            Patrolian data = filteredDatas[index];
-                            //print(data.waktuDatang);
-                            //print(DateFormat("yyyy-MM-ddTHH:mm:ssZ")
-                            //    .parseUTC(tamu.waktuDatang.toIso8601String()));
-                            //print(DateFormat('dd MMM yyyy hh:mm:ss a')
-                            //    .format(tamu.waktuDatang.toLocal()));
+                            KunjunganModel data = filteredDatas[index];
                             return Card(
                               margin: EdgeInsets.all(4.0),
                               child: Padding(
@@ -161,20 +221,19 @@ class _SampahState extends State<Sampah> {
                                 child: ListTile(
                                   leading: buildImageFromUrl(
                                       '$apiView/${data.uuid}', 50.0),
-                                  title: Text('Deskripsi: ${data.description}'),
+                                  title: Text(
+                                      'Jenis Kunjungan: ${data.jenisKunjungan.name}'),
                                   subtitle: Text(
-                                      'Waktu : ${DateFormat('dd MMM yyyy, hh:mm:ss a').format(data.createdAt.toLocal())}'),
+                                      'Description:\n${data.description}\nWaktu kunjungan:\n${DateFormat('dd MMM yyyy, hh:mm:ss a').format(data.createdAt.toLocal())}'),
                                   //trailing: Text(permission.date),
                                   onTap: () {
-                                    /*
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => DetailTamu(
-                                              patrolian: patrolian,
-                                              refreshListCallback: fetchTamu)),
+                                          builder: (context) => DetailKunjungan(
+                                              kunjungan: data,
+                                              refreshListCallback: fetchData)),
                                     );
-                                    */
                                   },
                                 ),
                               ),
@@ -186,7 +245,7 @@ class _SampahState extends State<Sampah> {
               width: double.infinity,
               margin: EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: navigateToFormSampah,
+                onPressed: navigateToForm,
                 style: ElevatedButton.styleFrom(
                   //backgroundColor: AppColors.secondaryColor,
                   shape: RoundedRectangleBorder(
@@ -194,7 +253,7 @@ class _SampahState extends State<Sampah> {
                   ),
                   padding: const EdgeInsets.all(20),
                 ),
-                child: Text('Laporkan Pengecekan Sampah'),
+                child: Text('Input Laporan Kunjungan'),
               ),
             ),
           ],

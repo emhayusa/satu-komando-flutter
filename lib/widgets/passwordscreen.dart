@@ -40,22 +40,32 @@ class _PasswordScreenState extends State<PasswordScreen> {
         //await Future.delayed(Duration(seconds: 2));
         try {
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          String userId = prefs.getString('user_id') ?? '';
-          print(userId);
-
+          String user = prefs.getString('user') ?? '';
+          //String userId = prefs.getString('user_id') ?? '';
+          //print(user);
+          var data = jsonDecode(user);
           // Menjalankan request ke API
           Map<String, dynamic> requestBody = {
-            'user_id': userId,
-            'password': password,
-            'new_password': newPassword,
+            'passwordOld': password,
+            'passwordNew': newPassword,
+            'passwordRepeat': repeatPassword,
+            //'user_id': userId,
+            //'password': password,
+            //'new_password': newPassword,
           };
-
-          var response = await http.post(
-            Uri.parse(API_PASSWORD),
-            headers: {'Content-Type': 'application/json'},
+          var url = API_PASSWORD + "/" + data['pegawai']['user']['uuid'];
+          print(url);
+          print('x-access-token: ' + data['accessToken']);
+          print(jsonEncode(requestBody));
+          var response = await http.put(
+            Uri.parse(url),
+            headers: {
+              'Content-Type': 'application/json',
+              'x-access-token': data['accessToken']
+            },
             body: jsonEncode(requestBody),
           );
-          //print(response.body);
+
           if (response.statusCode == 200) {
             // Parsing response ke dalam bentuk JSON
             var data = jsonDecode(response.body);
@@ -77,12 +87,13 @@ class _PasswordScreenState extends State<PasswordScreen> {
             repeatPasswordController.text = "";
           } else {
             var data = jsonDecode(response.body);
+            //print(data);
             // Menampilkan pesan error jika login gagal
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
                 title: Text('Update gagal'),
-                content: Text(data['error']),
+                content: Text(data['message']),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
@@ -93,6 +104,8 @@ class _PasswordScreenState extends State<PasswordScreen> {
             );
           }
         } catch (e) {
+          //print(e);
+
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
