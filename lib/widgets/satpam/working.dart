@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:kjm_security/model/insiden.dart';
-import 'package:kjm_security/model/tamu.dart';
 import 'package:kjm_security/widgets/satpam/body.dart';
-import 'package:kjm_security/widgets/satpam/detail_kejadian.dart';
-import 'package:kjm_security/widgets/satpam/detail_tamu.dart';
-import 'package:kjm_security/widgets/satpam/form_kejadian.dart';
-import 'package:kjm_security/widgets/satpam/form_kendaraan_inbound.dart';
-import 'package:kjm_security/widgets/satpam/form_tamu.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:kjm_security/widgets/satpam/sampah.dart';
 import 'dart:convert';
-
-import 'package:kjm_security/widgets/utils.dart';
 
 class Working extends StatefulWidget {
   const Working({super.key});
@@ -66,17 +56,17 @@ class _WorkingState extends State<Working> {
         List<Insiden> dataList =
             data.map((json) => Insiden.fromJson(json)).toList();
 
-        print(dataList.length);
+        //print(dataList.length);
 
         setState(() {
           datas = dataList;
           filteredDatas = dataList;
         });
       } else {
-        print('Gagal mengambil data ');
+        //print('Gagal mengambil data ');
       }
     } catch (e) {
-      print('Terjadi kesalahan saat mengambil data: $e');
+      //print('Terjadi kesalahan saat mengambil data: $e');
     }
     setState(() {
       isLoading = true;
@@ -112,7 +102,7 @@ class _WorkingState extends State<Working> {
                 onTap = () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Body()),
+                    MaterialPageRoute(builder: (context) => const Body()),
                   );
                 };
                 break;
@@ -122,7 +112,7 @@ class _WorkingState extends State<Working> {
                 onTap = () async {
                   await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Sampah()),
+                    MaterialPageRoute(builder: (context) => const Sampah()),
                   );
                 };
                 break;

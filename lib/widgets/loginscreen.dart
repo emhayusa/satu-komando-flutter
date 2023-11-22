@@ -50,13 +50,13 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         //print(response.body);
         if (response.statusCode == 200) {
-          print(response.body);
+          //print(response.body);
           //print(response.body.runtimeType);
           // Parsing response ke dalam bentuk JSON
           var data = jsonDecode(response.body);
 
           //print(data);
-          print(data['roles'][0]);
+          //print(data['roles'][0]);
           //print(data.runtimeType);
           //print(data['pegawai']);
           await saveUser(response.body);
@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
-        print(e);
+        //print(e);
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -127,12 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Terjadi kesalahan'),
-          content: Text('Email dan password harus diisi..'),
+          title: const Text('Terjadi kesalahan'),
+          content: const Text('Email dan password harus diisi..'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),

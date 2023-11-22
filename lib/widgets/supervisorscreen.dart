@@ -35,7 +35,7 @@ class _SupervisorPageState extends State<SupervisorPage> {
       // Pindah ke halaman login (setelah logout berhasil)
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

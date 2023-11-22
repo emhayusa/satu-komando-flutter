@@ -52,12 +52,12 @@ class _SampahState extends State<Sampah> {
       var data = jsonDecode(user);
       //print(data['pegawai']['lokasi']['uuid']);
       // final response = await http.get(Uri.parse('$API_PROFILE/$userId'));
-      var urlnya = apiUrl + "lokasi/" + data['pegawai']['lokasi']['uuid'];
+      var urlnya = "${apiUrl}lokasi/${data['pegawai']['lokasi']['uuid']}";
       //print(urlnya);
       final response = await http.get(Uri.parse(urlnya),
           headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
-        print(response.body);
+        //print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
@@ -71,17 +71,17 @@ class _SampahState extends State<Sampah> {
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
-        print(tamuList.length);
+        //print(tamuList.length);
 
         setState(() {
           datas = tamuList;
           filteredDatas = tamuList;
         });
       } else {
-        print('Gagal mengambil data ');
+        //print('Gagal mengambil data ');
       }
     } catch (e) {
-      print('Terjadi kesalahan saat mengambil data: $e');
+      //print('Terjadi kesalahan saat mengambil data: $e');
     }
     setState(() {
       isLoading = false;
@@ -122,11 +122,11 @@ class _SampahState extends State<Sampah> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: TextFormField(
                 controller: searchController,
                 onChanged: filterTamus,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Cari',
                   prefixIcon: Icon(Icons.search),
                 ),
@@ -135,14 +135,14 @@ class _SampahState extends State<Sampah> {
             Expanded(
               child: datas.isEmpty
                   ? isLoading
-                      ? Center(
+                      ? const Center(
                           child: CircularProgressIndicator(),
                         )
-                      : Center(
+                      : const Center(
                           child: Text("tidak menemukan data"),
                         )
-                  : filteredDatas.length == 0
-                      ? Center(
+                  : filteredDatas.isEmpty
+                      ? const Center(
                           child: Text("tidak menemukan data"),
                         )
                       : ListView.builder(
@@ -155,7 +155,7 @@ class _SampahState extends State<Sampah> {
                             //print(DateFormat('dd MMM yyyy hh:mm:ss a')
                             //    .format(tamu.waktuDatang.toLocal()));
                             return Card(
-                              margin: EdgeInsets.all(4.0),
+                              margin: const EdgeInsets.all(4.0),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ListTile(
@@ -184,7 +184,7 @@ class _SampahState extends State<Sampah> {
             ),
             Container(
               width: double.infinity,
-              margin: EdgeInsets.all(16.0),
+              margin: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: navigateToFormSampah,
                 style: ElevatedButton.styleFrom(
@@ -194,7 +194,7 @@ class _SampahState extends State<Sampah> {
                   ),
                   padding: const EdgeInsets.all(20),
                 ),
-                child: Text('Laporkan Pengecekan Sampah'),
+                child: const Text('Laporkan Pengecekan Sampah'),
               ),
             ),
           ],

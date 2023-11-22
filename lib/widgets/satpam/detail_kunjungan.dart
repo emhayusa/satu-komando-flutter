@@ -1,15 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import 'package:kjm_security/model/bukutamu.dart';
 import 'package:kjm_security/model/kunjungan.dart';
-import 'package:kjm_security/model/lokasi.dart';
-import 'package:kjm_security/model/reporter.dart';
-import 'package:kjm_security/model/tamu.dart';
 import 'package:kjm_security/widgets/utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailKunjungan extends StatefulWidget {
   final KunjunganModel kunjungan;
@@ -42,7 +34,6 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
       reporter: null);
       */
   String selectedItem = '';
-  bool _isUploading = false;
   String apiUrl = 'https://satukomando.id/api-prod/kunjungan/';
   String apiView = 'https://satukomando.id/api-prod/kunjungan/photo/';
   //String apiPulang = 'https://satukomando.id/api-prod/bukutamu/pulang/';
@@ -62,7 +53,7 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
       final response = await http.get(Uri.parse('$apiUrl$kode'),
           headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
-        print(response.body);
+        //print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
@@ -70,7 +61,7 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
         Map<String, dynamic> jsonData = json.decode(response.body);
 
         // Create an instance of the model class
-        print(jsonData.length);
+        //print(jsonData.length);
         Bukutamu _tamu = Bukutamu.fromJson(jsonData);
 
         setState(() {
@@ -78,10 +69,10 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
           tamu = _tamu;
         });
       } else {
-        print('Gagal mengambil data tamu');
+        //print('Gagal mengambil data tamu');
       }
     } catch (e) {
-      print('Terjadi kesalahan saat mengambil data tamu: $e');
+      //print('Terjadi kesalahan saat mengambil data tamu: $e');
     }
   }*/
   /*
@@ -101,10 +92,10 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
       try {
         // Menjalankan request ke API
         dynamic requestBody = data["pegawai"]["user"];
-        print(requestBody);
+        //print(requestBody);
         // Mengirim permintaan POST ke API
-        print(widget.tamu.uuid);
-        print(apiPulang + widget.tamu.uuid);
+        //print(widget.tamu.uuid);
+        //print(apiPulang + widget.tamu.uuid);
         var response = await http.put(
           Uri.parse(apiPulang + widget.tamu.uuid),
           headers: {"x-access-token": data['accessToken']},
@@ -134,7 +125,7 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
         } else {
           var data = jsonDecode(response.body);
           // Menampilkan pesan error jika login gagal
-          print(response.reasonPhrase);
+          //print(response.reasonPhrase);
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -150,7 +141,7 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
           );
         }
       } catch (e) {
-        print(e);
+        //print(e);
         showDialog(
           context: context,
           builder: (context) => AlertDialog(

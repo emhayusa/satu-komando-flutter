@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kjm_security/constant.dart';
 import 'package:kjm_security/model/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'top_background.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
@@ -33,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String user = prefs.getString('user') ?? '';
       var _data = jsonDecode(user);
-      print(_data);
+      //print(_data);
       Profile _profile = Profile.fromJson(_data);
 
       setState(() {
@@ -42,7 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       /*
       final response = await http.get(Uri.parse('$API_PROFILE/'+ ));
       if (response.statusCode == 200) {
-        print(response.body);
+        //print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
@@ -55,11 +53,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           data = _profile;
         });
       } else {
-        print('Gagal mengambil data profile');
+        //print('Gagal mengambil data profile');
       }
       */
     } catch (e) {
-      print('Terjadi kesalahan saat mengambil data profile: $e');
+      //print('Terjadi kesalahan saat mengambil data profile: $e');
     }
     setState(() {
       isLoading = false;
@@ -69,8 +67,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    String defaultImage =
-        "https://ui-avatars.com/api/?name=Muhammad+Hasannudin+Yusa";
     return Scaffold(
       appBar: AppBar(
         title: const Text("PROFIL PEGAWAI"),

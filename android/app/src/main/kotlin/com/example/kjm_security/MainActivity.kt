@@ -1,4 +1,4 @@
-package com.example.kjm_security
+package id.satukomando.kjm_security
 
 import io.flutter.embedding.android.FlutterActivity
 

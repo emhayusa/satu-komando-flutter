@@ -1,13 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:kjm_security/model/paket.dart';
-import 'package:kjm_security/model/paketan.dart';
-import 'package:kjm_security/model/tamu.dart';
 import 'package:kjm_security/widgets/utils.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailPaketan extends StatefulWidget {
   final Paketan paketan;
@@ -30,7 +24,6 @@ class _DetailPaketanState extends State<DetailPaketan> {
       hp: 'hp');
       */
   String selectedItem = '';
-  bool _isUploading = false;
 
   //String apiUrl = 'https://geoportal.big.go.id/api-dev/packages/';
   //String apiView = 'https://geoportal.big.go.id/api-dev/packages/photo/';

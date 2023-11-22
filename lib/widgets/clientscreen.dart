@@ -3,10 +3,7 @@ import 'package:kjm_security/constant.dart';
 import 'package:kjm_security/widgets/loginscreen.dart';
 import 'package:kjm_security/widgets/mitra/clientdashboard.dart';
 import 'package:kjm_security/widgets/passwordscreen.dart';
-import 'package:kjm_security/widgets/profilescreen.dart';
 import 'package:kjm_security/widgets/profileuserscreen.dart';
-import 'package:kjm_security/widgets/satpam/satpamdashboard.dart';
-import 'package:kjm_security/widgets/supervisor/supervisordashboard.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;

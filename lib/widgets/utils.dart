@@ -9,9 +9,9 @@ Widget buildImageFromUrl(String imageUrl, double size) {
       height: size,
       imageUrl: imageUrl,
       placeholder: (context, url) =>
-          CircularProgressIndicator(), // Menampilkan loading saat gambar sedang dimuat
-      errorWidget: (context, url, error) =>
-          Icon(Icons.error), // Menampilkan ikon error jika gagal memuat gambar
+          const CircularProgressIndicator(), // Menampilkan loading saat gambar sedang dimuat
+      errorWidget: (context, url, error) => const Icon(
+          Icons.error), // Menampilkan ikon error jika gagal memuat gambar
       fit: BoxFit.cover,
     ),
   );

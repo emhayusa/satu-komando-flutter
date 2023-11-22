@@ -57,7 +57,7 @@ class _BukuTamuState extends State<BukuTamu> {
       final response = await http.get(Uri.parse(urlnya),
           headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
-        print(response.body);
+        //print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
@@ -67,17 +67,17 @@ class _BukuTamuState extends State<BukuTamu> {
         List<Bukutamu> tamuList =
             data.map((json) => Bukutamu.fromJson(json)).toList();
 
-        print(tamuList.length);
+        //print(tamuList.length);
 
         setState(() {
           tamus = tamuList;
           filteredTamus = tamuList;
         });
       } else {
-        print('Gagal mengambil data Tamu');
+        //print('Gagal mengambil data Tamu');
       }
     } catch (e) {
-      print('Terjadi kesalahan saat mengambil data tamu: $e');
+      //print('Terjadi kesalahan saat mengambil data tamu: $e');
     }
     setState(() {
       isLoading = false;
@@ -148,7 +148,7 @@ class _BukuTamuState extends State<BukuTamu> {
 
   void _handleDialogResult() {
     //fetchTamu();
-    print("dipanggil");
+    //print("dipanggil");
   }
   */
 
@@ -199,7 +199,7 @@ class _BukuTamuState extends State<BukuTamu> {
                           itemCount: filteredTamus.length,
                           itemBuilder: (BuildContext context, int index) {
                             Bukutamu tamu = filteredTamus[index];
-                            print(tamu.waktuDatang);
+                            //print(tamu.waktuDatang);
                             //print(DateFormat("yyyy-MM-ddTHH:mm:ssZ")
                             //    .parseUTC(tamu.waktuDatang.toIso8601String()));
                             //print(DateFormat('dd MMM yyyy hh:mm:ss a')

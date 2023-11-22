@@ -46,7 +46,7 @@ class _FormBodyState extends State<FormBody> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String user = prefs.getString('user') ?? '';
     var data = jsonDecode(user);
-    print(data);
+    //print(data);
 
     setState(() {
       _isUploading = true;
@@ -72,7 +72,7 @@ class _FormBodyState extends State<FormBody> {
             ',"lokasi":' +
             jsonEncode(data['pegawai']['lokasi']) +
             '}';
-        print(jsonEncode(data['pegawai']['user']));
+        //print(jsonEncode(data['pegawai']['user']));
         //request.fields['guest_name'] = _namaController.text;
         //request.fields['come_to'] = _tujuanController.text;
         //request.fields['purpose'] = _keperluanController.text;
@@ -82,12 +82,12 @@ class _FormBodyState extends State<FormBody> {
         final response = await request.send();
 
         final totalBytes = response.contentLength;
-        print("total bytes");
-        print(totalBytes);
+        //print("total bytes");
+        //print(totalBytes);
         await response.stream.listen(
           (List<int> event) {
             final sentBytes = event.length;
-            // print('sent $sentBytes');
+            //print('sent $sentBytes');
             //_updateProgress(sentBytes, totalBytes!);
           },
           onDone: () {
@@ -110,7 +110,7 @@ class _FormBodyState extends State<FormBody> {
               Navigator.pop(context);
             } else {
               // Handle API error response
-              print(response.reasonPhrase);
+              //print(response.reasonPhrase);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Data gagal dikirim'),

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kjm_security/constant.dart';
 import 'package:kjm_security/widgets/loginscreen.dart';
 import 'package:kjm_security/widgets/passwordscreen.dart';
-import 'package:kjm_security/widgets/profilescreen.dart';
 import 'package:kjm_security/widgets/satpam/satpamdashboard.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

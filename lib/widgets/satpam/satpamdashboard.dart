@@ -42,21 +42,21 @@ class SatpamDashboard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: EdgeInsets.only(right: 20),
+                      padding: const EdgeInsets.only(right: 20),
                       width: 60,
                       height: 40,
                       child: Image.asset("assets/icons/schedule.png"),
                     ),
-                    MyClock()
+                    const MyClock()
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Container(
-                  padding: EdgeInsets.all(20),
-                  margin: EdgeInsets.symmetric(horizontal: 15),
+                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [
                         Color(0xFFdedefc),
                         Color(0xFFe3e3e3),
@@ -71,91 +71,15 @@ class SatpamDashboard extends StatelessWidget {
                         children: [
                           InkWell(
                             onTap: () {
-                              //Get.toNamed(Routes.SERVICES)
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => BukuTamu()),
+                                    builder: (context) => Kehadiran()),
                               );
                             },
                             child: ItemKategori(
-                              title: "Buku Tamu",
-                              icon: "assets/icons/book.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              //Get.toNamed(Routes.TANYA)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Kunjungan()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Kunjungan",
-                              icon: "assets/icons/supervisor.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              //Get.toNamed(Routes.TANYA)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Kejadian()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Laporan",
-                              icon: "assets/icons/kejadian.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              //Get.toNamed(Routes.DINAS)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Paket()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Paket",
-                              icon: "assets/icons/activity.png",
-                            ),
-                          ),
-                          /*
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => Ijin()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Ijin",
-                              icon: "assets/icons/todo.png",
-                            ),
-                          ),*/
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              //Get.toNamed(Routes.TANYA)
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Parkir()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Parkir \nKendaraan",
-                              icon: "assets/icons/parking.png",
+                              title: "Presensi\n",
+                              icon: "assets/icons/presensi.png",
                             ),
                           ),
                           InkWell(
@@ -173,19 +97,6 @@ class SatpamDashboard extends StatelessWidget {
                           ),
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Kehadiran()),
-                              );
-                            },
-                            child: ItemKategori(
-                              title: "Presensi\n",
-                              icon: "assets/icons/presensi.png",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
                               // Get.toNamed(Routes.DATA)
                               Navigator.push(
                                 context,
@@ -194,8 +105,84 @@ class SatpamDashboard extends StatelessWidget {
                               );
                             },
                             child: ItemKategori(
-                              title: "Work \nInstruction",
+                              title: "WI",
                               icon: "assets/icons/delivery.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.TANYA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Parkir()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Parkir",
+                              icon: "assets/icons/parking.png",
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.TANYA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Kejadian()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Laporan",
+                              icon: "assets/icons/kejadian.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.TANYA)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Kunjungan()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Kunjungan",
+                              icon: "assets/icons/supervisor.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.DINAS)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Paket()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Paket",
+                              icon: "assets/icons/activity.png",
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              //Get.toNamed(Routes.SERVICES)
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const BukuTamu()),
+                              );
+                            },
+                            child: ItemKategori(
+                              title: "Buku Tamu",
+                              icon: "assets/icons/book.png",
                             ),
                           ),
                           /*InkWell(

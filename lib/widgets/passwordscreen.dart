@@ -54,9 +54,9 @@ class _PasswordScreenState extends State<PasswordScreen> {
             //'new_password': newPassword,
           };
           var url = API_PASSWORD + "/" + data['pegawai']['user']['uuid'];
-          print(url);
-          print('x-access-token: ' + data['accessToken']);
-          print(jsonEncode(requestBody));
+          //print(url);
+          //print('x-access-token: ' + data['accessToken']);
+          //print(jsonEncode(requestBody));
           var response = await http.put(
             Uri.parse(url),
             headers: {

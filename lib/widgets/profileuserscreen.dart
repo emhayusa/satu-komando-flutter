@@ -43,10 +43,10 @@ class _ProfileClientScreenState extends State<ProfileClientScreen> {
           data = _profile;
         });
       } else {
-        print('Gagal mengambil data profile');
+        //print('Gagal mengambil data profile');
       }
     } catch (e) {
-      print('Terjadi kesalahan saat mengambil data profile: $e');
+      //print('Terjadi kesalahan saat mengambil data profile: $e');
     }
     setState(() {
       isLoading = false;
@@ -56,8 +56,6 @@ class _ProfileClientScreenState extends State<ProfileClientScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    String defaultImage =
-        "https://ui-avatars.com/api/?name=Muhammad+Hasannudin+Yusa";
     return Scaffold(
       appBar: AppBar(
         title: const Text("PROFIL MITRA"),

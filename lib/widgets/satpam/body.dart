@@ -57,7 +57,7 @@ class _BodyState extends State<Body> {
       final response = await http.get(Uri.parse(urlnya),
           headers: {"x-access-token": data['accessToken']});
       if (response.statusCode == 200) {
-        print(response.body);
+        //print(response.body);
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
@@ -71,17 +71,17 @@ class _BodyState extends State<Body> {
         //print(json.decode(response.body));
         //final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
 
-        print(tamuList.length);
+        //print(tamuList.length);
 
         setState(() {
           datas = tamuList;
           filteredDatas = tamuList;
         });
       } else {
-        print('Gagal mengambil data ');
+        //print('Gagal mengambil data ');
       }
     } catch (e) {
-      print('Terjadi kesalahan saat mengambil data: $e');
+      //print('Terjadi kesalahan saat mengambil data: $e');
     }
     setState(() {
       isLoading = false;
