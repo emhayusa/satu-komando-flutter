@@ -128,7 +128,7 @@ class _ListSampahState extends State<ListSampah> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cek Pembuangan Sampah'),
+        title: const Text('Pengecekan Sampah'),
         centerTitle: true,
       ),
       body: RefreshIndicator(
