@@ -241,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 20,
             ),
 
-            Center(child: Text("Version: 0.1.4")),
+            Center(child: Text("Version: 1.0.2")),
             //TextButton(
             //  onPressed: () {},
             //  child: Text("forgot password?"),
