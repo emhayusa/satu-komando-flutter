@@ -212,7 +212,7 @@ class _DetailKunjunganState extends State<DetailKunjungan> {
               ListTile(
                 leading: Icon(Icons.access_time),
                 title: Text(DateFormat('dd-MM-yyyy HH:mm:ss')
-                    .format(widget.kunjungan.waktuDatang)),
+                    .format(widget.kunjungan.waktuDatang.toLocal())),
               ),
               /*
               ListTile(

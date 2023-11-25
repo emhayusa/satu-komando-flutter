@@ -208,12 +208,12 @@ class _DetailTamuState extends State<DetailTamu> {
               ListTile(
                 leading: Icon(Icons.access_time),
                 title: Text(DateFormat('dd-MM-yyyy HH:mm:ss')
-                    .format(widget.tamu.waktuDatang)),
+                    .format(widget.tamu.waktuDatang.toLocal())),
               ),
               ListTile(
                 leading: Icon(Icons.access_alarms),
                 title: Text(
-                    '${widget.tamu.waktuPulang == null ? '-' : DateFormat('dd-MM-yyyy HH:mm:ss').format(widget.tamu.waktuPulang!)}'),
+                    '${widget.tamu.waktuPulang == null ? '-' : DateFormat('dd-MM-yyyy HH:mm:ss').format(widget.tamu.waktuPulang!.toLocal())}'),
               ),
               SizedBox(height: 16.0),
               widget.tamu.waktuPulang == null

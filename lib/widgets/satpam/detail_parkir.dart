@@ -197,12 +197,12 @@ class _DetailParkirState extends State<DetailParkir> {
               ListTile(
                 leading: Icon(Icons.access_time),
                 title: Text(DateFormat('dd-MM-yyyy HH:mm:ss')
-                    .format(widget.parkir.waktuDatang)),
+                    .format(widget.parkir.waktuDatang.toLocal())),
               ),
               ListTile(
                 leading: Icon(Icons.access_alarms),
                 title: Text(
-                    '${widget.parkir.waktuPulang == null ? '-' : DateFormat('dd-MM-yyyy HH:mm:ss').format(widget.parkir.waktuPulang!)}'),
+                    '${widget.parkir.waktuPulang == null ? '-' : DateFormat('dd-MM-yyyy HH:mm:ss').format(widget.parkir.waktuPulang!.toLocal())}'),
               ),
               SizedBox(height: 16.0),
               widget.parkir.waktuPulang == null
