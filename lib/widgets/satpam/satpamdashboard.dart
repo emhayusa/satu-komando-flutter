@@ -67,7 +67,7 @@ class SatpamDashboard extends StatelessWidget {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           InkWell(
                             onTap: () {
@@ -128,6 +128,7 @@ class SatpamDashboard extends StatelessWidget {
                       SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           InkWell(
                             onTap: () {
@@ -181,7 +182,7 @@ class SatpamDashboard extends StatelessWidget {
                               );
                             },
                             child: ItemKategori(
-                              title: "Buku Tamu",
+                              title: "Buku \nTamu",
                               icon: "assets/icons/book.png",
                             ),
                           ),
