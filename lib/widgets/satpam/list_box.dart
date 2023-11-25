@@ -126,7 +126,7 @@ class _ListBoxState extends State<ListBox> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cek Box dan Kabin'),
+        title: const Text('Inbound'),
         centerTitle: true,
       ),
       body: RefreshIndicator(
@@ -302,7 +302,7 @@ class _ListBoxState extends State<ListBox> {
                   ),
                   padding: const EdgeInsets.all(20),
                 ),
-                child: Text('Laporkan Cek Box Kendaraan'),
+                child: Text('Laporkan Inbound'),
               ),
             ),
           ],

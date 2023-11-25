@@ -43,7 +43,7 @@ class _DetailCekBoxState extends State<DetailCekBox> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detail Cek Box'),
+        title: Text('Detail Inbound'),
       ),
       body: SingleChildScrollView(
         child: Card(
@@ -57,15 +57,15 @@ class _DetailCekBoxState extends State<DetailCekBox> {
               ),
               ListTile(
                 leading: Icon(Icons.check_box_outline_blank),
-                title: Text(widget.box.noSurat),
+                title: Text("No Surat: " + widget.box.noSurat),
               ),
               ListTile(
                 leading: Icon(Icons.car_repair),
-                title: Text(widget.box.noPolisi),
+                title: Text("No Polisi: " + widget.box.noPolisi),
               ),
               ListTile(
                 leading: Icon(Icons.person),
-                title: Text(widget.box.namaDriver),
+                title: Text("Nama Driver: " + widget.box.namaDriver),
               ),
               ListTile(
                 leading: Icon(Icons.access_time),

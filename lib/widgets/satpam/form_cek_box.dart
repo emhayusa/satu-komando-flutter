@@ -264,7 +264,7 @@ class _FormCekBoxState extends State<FormCekBox> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Isian Cek Box'),
+        title: const Text('Form Isian Inbound'),
         centerTitle: true,
       ),
       body: Padding(
