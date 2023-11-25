@@ -126,7 +126,7 @@ class _ListTaskState extends State<ListTask> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cek Jumlah Task'),
+        title: const Text('Outbound'),
         centerTitle: true,
       ),
       body: RefreshIndicator(
@@ -279,7 +279,7 @@ class _ListTaskState extends State<ListTask> {
                   ),
                   padding: const EdgeInsets.all(20),
                 ),
-                child: Text('Laporkan Jumlah Task Order'),
+                child: Text('Laporkan Outbound'),
               ),
             ),
           ],

@@ -45,7 +45,7 @@ class _DetailCekTaskState extends State<DetailCekTask> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detail Cek Box'),
+        title: Text('Detail Outbound'),
       ),
       body: SingleChildScrollView(
         child: Card(
@@ -59,11 +59,11 @@ class _DetailCekTaskState extends State<DetailCekTask> {
               ),
               ListTile(
                 leading: Icon(Icons.check_box_outline_blank),
-                title: Text(widget.task.noSurat),
+                title: Text("No Surat: " + widget.task.noSurat),
               ),
               ListTile(
                 leading: Icon(Icons.car_repair),
-                title: Text(widget.task.noPolisi),
+                title: Text("No Polisi: " + widget.task.noPolisi),
               ),
               ListTile(
                 leading: Icon(Icons.access_time),
