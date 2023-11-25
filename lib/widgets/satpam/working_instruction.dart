@@ -38,7 +38,7 @@ class _WorkingInstructionState extends State<WorkingInstruction> {
 
             switch (index) {
               case 0:
-                title = "Pengecekan Pembuangan Sampah";
+                title = "Pengecekan Sampah";
                 icon = Icons.landslide;
                 onTap = () async {
                   await Navigator.push(
@@ -48,7 +48,7 @@ class _WorkingInstructionState extends State<WorkingInstruction> {
                 };
                 break;
               case 1:
-                title = "Pengecekan Box dan Kabin";
+                title = "Inbound";
                 icon = Icons.fire_truck;
                 onTap = () async {
                   await Navigator.push(
@@ -58,7 +58,7 @@ class _WorkingInstructionState extends State<WorkingInstruction> {
                 };
                 break;
               case 2:
-                title = "Pengecekan Jumlah Task Order";
+                title = "Outbound";
                 icon = Icons.fact_check;
                 onTap = () async {
                   await Navigator.push(
